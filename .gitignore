@@ -1,3 +1,4 @@
+# Rust
 /target
 
 # Byte-compiled / optimized / DLL files
@@ -28,6 +29,14 @@ venv/
 *.egg-info/
 .installed.cfg
 *.egg
+
+# Maturin builds
+*.pyd
+*.whl
+
+# Misc
+.env
+.DS_Store
 
 # Installer logs
 pip-log.txt
