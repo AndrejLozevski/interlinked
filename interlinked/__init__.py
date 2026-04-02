@@ -1,6 +1,6 @@
 from . import interlinked
 from . import config
+from . import stats
 
 add = interlinked.add
-pearson = interlinked.pearson
-__all__ = ['add', 'pearson', 'config']
+__all__ = ['add', 'stats', 'config']
