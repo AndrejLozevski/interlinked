@@ -1,0 +1,304 @@
+import os
+import sys
+import csv
+import uuid
+import h5py
+import logging
+import numpy as np
+import pandas as pd
+import tifffile as tiff
+import xml.etree.ElementTree as ET
+
+from tqdm import tqdm
+from pathlib import Path
+from dataclasses import dataclass, field
+
+import interlinked as nex
+
+log = logging.getLogger(__name__)
+
+
+#--| Constants |------------------------------------------------------------------------#
+
+TEMP_DIRECTORY = nex.config.TEMP_DIRECTORY
+PREFIX         = nex.config.TEMP_FILE_PREFIX
+SUFFIX         = nex.config.TEMP_FILE_SUFFIX
+
+TIF2D = {'imagej':True, 'metadata':{'axes': 'YX'}}
+TIF3D = {'imagej':True, 'metadata':{'axes':'ZYX'}}
+
+
+#--| Utilities |------------------------------------------------------------------------#
+
+# Ensures a specified path is a Path instance
+def _path(path, new=False):
+    if type(path) == str:
+        path = Path(path)
+    if (not new) and (not path.exists()):
+        log.error("Path '%s' does not exist", path)
+        sys.exit(1)
+    return path
+
+# finds a file
+def find_file(path, pattern):
+    path = _path(path)
+
+    files = list(path.glob(pattern))
+    if len(files) == 0:
+        log.error("No '%s' file found in '%s'", pattern, path)
+        sys.exit(1)
+    if len(files) > 1:
+        log.error("Found %s file(s) with the pattern '%s' in '%s'", len(files), pattern, path)
+        sys.exit(1)
+
+    file = files[0]
+    return file
+
+# Loads a file
+def load_file(path, pattern, pickled=False):
+    path = _path(path)
+    file = find_file(path, pattern)
+
+    if file.suffix == '.npy':
+        data = np.load(file, allow_pickle=pickled)
+    elif file.suffix == '.tif':
+        data = tiff.imread(file)
+    elif file.suffix in ['.h5', '.hdf5']:
+        data = h5py.File(file, 'r')
+    else:
+        log.error("Unrecognized file extension: '%s'", file.suffix)
+        sys.exit(1)
+    return data
+
+# Creates temporary filename (for memmap files)
+def temp_filepath():
+    prefix = PREFIX
+    suffix = SUFFIX
+    temp_id = uuid.uuid4()
+
+    filepath = TEMP_DIRECTORY / f'{prefix}{temp_id}{suffix}'
+    return filepath
+
+# Safely deletes temporary memmap files from the temp directory (VERY STRICT)
+def safely_delete(path):
+    path = _path(path)
+    temp_dir = TEMP_DIRECTORY
+    prefix = PREFIX
+    suffix = SUFFIX
+
+    if not path.parent == temp_dir:
+        log.error("File directory '%s' doesn\'t match the /temp directory '%s'", path.parent, temp_dir)
+        sys.exit(1)
+    elif not str(path.name).startswith(prefix):
+        log.error("File name '%s' doesn\'t start with the expected prefix '%s'", path.parent, temp_dir)
+        sys.exit(1)
+    elif not path.suffix == suffix:
+        log.error("File extension '%s' doesn\'t match the expected suffix '%s'", path.suffix, suffix)
+        sys.exit(1)
+    else:
+        os.remove(path)
+    return
+
+# Checks for leftover temporary files
+def check_temp(clear=False):
+    files = list(TEMP_DIRECTORY.iterdir())
+    if len(files) > 0:
+        if clear:
+            clear_temp(False)
+            log.warning('Found and deleted %s temporary file(s) in temp directory.', len(files))
+        else:
+            log.warning('Found %s temporary file(s) in temp directory. Delete them if not in use.', len(files))
+    return
+
+# Clears leftover temporary files
+def clear_temp(notify=True):
+    files = list(TEMP_DIRECTORY.iterdir())
+    if len(files) > 0:
+        for file in files:
+            safely_delete(file)
+        if notify:
+            log.info('Temp directory cleared of %s temporary file(s).', len(files))
+    return
+
+        
+#--| Memmaps |--------------------------------------------------------------------------#
+
+# Stores memmap metadata
+@dataclass
+class Memmap:
+    shape: tuple
+    dtype: str
+    path:  Path = field(default_factory=temp_filepath)
+
+    def save(self, data):
+        mem = np.memmap(self.path, shape=self.shape, dtype=self.dtype, mode='w+')
+        mem[:] = data
+        return
+
+    def load(self, read_only=True):
+        mode = 'r' if read_only else 'r+'
+        mem = np.memmap(self.path, shape=self.shape, dtype=self.dtype, mode=mode)
+        return mem
+
+    def delete(self):
+        safely_delete(self.path, True)
+        return
+
+
+#--| Metadata |-------------------------------------------------------------------------#
+
+# Loads fps from parent directory
+def load_fps(path):
+    path = _path(path)
+    fps_file = find_file(path, '*frequency.txt')
+    with open(fps_file, 'r') as file:
+        fps = float(file.readline().strip())
+    return fps
+
+# Loads resolution from parent directory
+def load_resolution(path):
+    path = _path(path)
+    file = find_file(path, '*.xml')
+
+    Ry, Rx = (0.406, 0.406)
+    data = ET.parse(file)
+    root = data.getroot()
+    for info in root.findall('info'):
+        if (Rz := info.get('z_step')) is not None:
+            return float(Rz), Ry, Rx
+    else:
+        log.error("No 'z_step' tag found in '%s'", file.name)
+        sys.exit(1)
+    return
+
+# Loads metadata form parent directory
+def load_metadata(path):
+    path = _path(path)
+    Rz, Ry, Rx = load_resolution(path)
+    Rt = 1 / load_fps(path)
+    return Rz, Ry, Rx, Rt
+
+
+#--| Suite2p Data |---------------------------------------------------------------------#
+
+# Ensures that the provided path is the Suite2p combined directory
+def ensure_suite2p_path(path):
+    path = _path(path)
+    if (path / 'suite2p').exists():
+        path = path / 'suite2p'
+    if (path / 'combined').exists():
+        path = path / 'combined'
+    if path.name != 'combined':
+        log.error('No suite2p combined directory found at %s', path)
+        sys.exit(1)
+
+    needed_files = ['stat.npy', 'F.npy', 'ops.npy']
+    for file in needed_files:
+        if path / file not in list(path.iterdir()):
+            log.error("file '%s' not found in %s", file, path)
+            sys.exit(1)
+    return path
+
+# Aligns ROIs into a volume from a Suite2p combined stat.npy file
+def align_rois(cell_locations, shape):
+    Lc, Lt, Lz, Ly, Lx = shape
+    cell_id = 0
+    rois = -1 * np.ones((Lz, Ly, Lx), dtype=np.int64)
+    for c in range(Lc):
+        ypix   = cell_locations[c]['ypix']
+        xpix   = cell_locations[c]['xpix']
+        zplane = cell_locations[c]['iplane']
+        assert len(ypix) == len(xpix)
+
+        for i in range(len(ypix)):
+            rois[zplane, divmod(ypix[i], Ly)[1], divmod(xpix[i], Lx)[1]] = cell_id
+        cell_id += 1
+    return rois
+
+# Loads brainmap as a volume from ops.npy file
+def load_brainmap(ops, shape):
+    Lc, Lt, Lz, Ly, Lx = shape
+    mean = ops['meanImg'].astype(np.float32)
+    bmap = nex.form_volume(mean, (Lz, Ly, Lx))
+
+    Oy, Ox = mean.shape
+    assert (Oy//Ly) * (Ox//Lx) >= Lz
+
+    z = 0
+    bmap = np.empty((Lz, Ly, Lx), np.float32)
+    for i in range(Oy//Ly):
+        for j in range(Ox//Lx):
+            if z >= Lz:
+                break
+            bmap[z,:,:] = mean[i*Ly:(i+1)*Ly, j*Lx:(j+1)*Lx]
+            z += 1
+    assert bmap.dtype == np.float32 and bmap.shape == (Lz, Ly, Lx)
+    return bmap
+
+# Loads Suite2p data from the given path
+def load_suite2p_data(path):
+    path = ensure_suite2p_path(path)
+    cell_locations = np.load(path / 'stat.npy', allow_pickle=True)
+    cell_traces    = np.load(path / 'F.npy',    allow_pickle=True)
+    ops            = np.load(path / 'ops.npy',  allow_pickle=True).item()
+
+    baseline = np.percentile(cell_traces, 20, axis=1, keepdims=True)
+    cell_traces = (cell_traces - baseline) / nex.utils.divisor(baseline)
+    cell_traces = (cell_traces - cell_traces.mean()) / cell_traces.std()
+
+    shape = (
+        cell_traces.shape[0],    # Lc, cell count
+        cell_traces.shape[1],    # Lt, timepoints
+        ops['nplanes'],          # Lz, length Z
+        ops['lenY'],             # Ly, length Y
+        ops['lenX']              # Lx, length X
+    )
+
+    bmap = load_brainmap(ops, shape)
+    rois = align_rois(cell_locations, shape)
+    return roise, cell_traces, bmap, shape, ops
+
+
+#--| VoluSeg Data |---------------------------------------------------------------------#
+
+# Ensures that the provided path is the VoluSeg directory
+def ensure_voluseg_path(path):
+    path = _path(path)
+    if (path / 'voluseg').exists():
+        path = path / 'voluseg'
+    if path.name != 'voluseg':
+        log.error("No voluseg directory found at %s", path)
+        sys.exit(1)
+
+    needed_files = ['cells0_clean.hdf5', 'volume0.hdf5']
+    for file in needed_files:
+        if path / file not in list(path.iterdir()):
+            log.error("File '%s' not found in %s", file, path)
+            sys.exit(1)
+    return path
+
+# Loads VoluSeg data from the given path
+def load_voluseg_data(path):
+    path = ensure_voluseg_path(path)
+
+    volume_data = h5py.File(path / 'volume0.hdf5',      'r')
+    cell_data   = h5py.File(path / 'cells0_clean.hdf5', 'r')
+
+    raw_traces = cell_data['cell_timeseries'][:].astype(np.float32)
+    baseline   = cell_data['cell_baseline'][:].astype(np.float32)
+    cell_traces = (raw_traces - baseline) / nex.utils.divisor(baseline)
+    cell_traces = (cell_traces - cell_traces.mean()) / cell_traces.std()
+    assert raw_traces.shape == cell_traces.shape == baseline.shape
+
+    bmap = volume_data['volume_mean'][:].astype(np.float32)
+    rois = cell_data['volume_id'][:].T.astype(np.float32)
+
+    shape = (
+        cell_traces.shape[0],    # Lc, cell count
+        cell_traces.shape[1],    # Lt, timepoints
+        bmap.shape[0],           # Lz, length Z
+        bmap.shape[1],           # Ly, length Y
+        bmap.shape[2]            # Lx, length X
+    )
+    return rois, cell_traces, bmap, shape
+
