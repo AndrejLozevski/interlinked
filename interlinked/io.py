@@ -7,6 +7,7 @@ import logging
 import numpy as np
 import pandas as pd
 import tifffile as tiff
+import skimage.morphology as morph
 import xml.etree.ElementTree as ET
 
 from tqdm import tqdm
@@ -301,4 +302,60 @@ def load_voluseg_data(path):
         bmap.shape[2]            # Lx, length X
     )
     return rois, cell_traces, bmap, shape
+
+
+#--| Trials |---------------------------------------------------------------------------#
+
+# Creates a (trial, time) array of time indices for masking
+def split_trials(drift):
+    mask_drift = (drift != 0)
+    mask_move  = morph.remove_small_objects(mask_drift, min_size=10)
+    mask_wait  = ~mask_move
+    mask_pulse = mask_wait & mask_drift
+
+    def measure_periods(mask):
+        labels = morph.label(mask)
+        sums = [
+            np.sum(labels == i) for i in range(1, labels.max() + 1)
+        ]
+        counts = [
+            (i, sum([sums[j] == i for j in range(len(sums))]))
+            for
+            i in np.unique(sums)
+        ]
+        mask_sort = sorted(counts, key=lambda count: count[1])
+        mask_len  = mask_sort[-1][0]
+        mask_num  = mask_sort[-1][1]
+        return mask_len, mask_num
+
+    move_len, move_num = measure_periods(mask_move)
+    wait_len, wait_num = measure_periods(mask_wait)
+    
+    Ltt = wait_len + move_len
+    Lt = len(drift)
+    Ln = min(move_num, wait_num)
+
+    starts = np.nonzero(np.diff(mask_move.astype(np.uint8)) == 1)[0] + 1
+    periods = []
+    for i in range(len(starts)):
+        if i == len(starts) - 1:
+            if Lt - starts[i] >= Ltt:
+                periods.append(starts[i] + np.arange(Ltt))
+            continue
+        
+        length = starts[i+1] - starts[i]
+        if length != Ltt:
+            continue
+        periods.append(starts[i] + np.arange(Ltt))
+    
+    Ln = len(periods)
+    trials = np.zeros((Ln, Ltt), np.uint16)
+    for n in range(Ln):
+        trials[n,:] = periods[n]
+
+    pulses = mask_pulse[trials]
+    pulse  = np.nonzero(pulses.sum(axis=0))[0]
+    pulses[:, pulse] = True
+    return trials, mask_move[trials], mask_wait[trials], pulses 
+
 
