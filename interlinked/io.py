@@ -307,7 +307,7 @@ def load_voluseg_data(path):
 #--| Trials |---------------------------------------------------------------------------#
 
 # Creates a (trial, time) array of time indices for masking
-def split_trials(drift):
+def build_trials(drift):
     mask_drift = (drift != 0)
     mask_move  = morph.remove_small_objects(mask_drift, min_size=10)
     mask_wait  = ~mask_move
