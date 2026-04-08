@@ -1,5 +1,5 @@
-import interlinked as nex
+import interlinked as lnk
 
 def test_add():
-    assert nex.add(1, 2) == 3
+    assert lnk.add(1, 2) == 3
 

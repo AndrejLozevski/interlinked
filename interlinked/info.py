@@ -1,13 +1,13 @@
 import logging
 import numpy as np
-import interlinked as nex
+import interlinked as lnk
 
 log = logging.getLogger(__name__)
 
 
 #--| Constants |------------------------------------------------------------------------#
 
-NUM_BINS = nex.config.NUM_BINS
+NUM_BINS = lnk.config.NUM_BINS
 
 
 #--| Utilities |------------------------------------------------------------------------#

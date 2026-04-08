@@ -14,16 +14,16 @@ from tqdm import tqdm
 from pathlib import Path
 from dataclasses import dataclass, field
 
-import interlinked as nex
+import interlinked as lnk
 
 log = logging.getLogger(__name__)
 
 
 #--| Constants |------------------------------------------------------------------------#
 
-TEMP_DIRECTORY = nex.config.TEMP_DIRECTORY
-PREFIX         = nex.config.TEMP_FILE_PREFIX
-SUFFIX         = nex.config.TEMP_FILE_SUFFIX
+TEMP_DIRECTORY = lnk.config.TEMP_DIRECTORY
+PREFIX         = lnk.config.TEMP_FILE_PREFIX
+SUFFIX         = lnk.config.TEMP_FILE_SUFFIX
 
 TIF2D = {'imagej':True, 'metadata':{'axes': 'YX'}}
 TIF3D = {'imagej':True, 'metadata':{'axes':'ZYX'}}
@@ -220,7 +220,7 @@ def align_rois(cell_locations, shape):
 def load_brainmap(ops, shape):
     Lc, Lt, Lz, Ly, Lx = shape
     mean = ops['meanImg'].astype(np.float32)
-    bmap = nex.form_volume(mean, (Lz, Ly, Lx))
+    bmap = lnk.form_volume(mean, (Lz, Ly, Lx))
 
     Oy, Ox = mean.shape
     assert (Oy//Ly) * (Ox//Lx) >= Lz
@@ -244,7 +244,7 @@ def load_suite2p_data(path):
     ops            = np.load(path / 'ops.npy',  allow_pickle=True).item()
 
     baseline = np.percentile(cell_traces, 20, axis=1, keepdims=True)
-    cell_traces = (cell_traces - baseline) / nex.utils.divisor(baseline)
+    cell_traces = (cell_traces - baseline) / lnk.utils.divisor(baseline)
     cell_traces = (cell_traces - cell_traces.mean()) / cell_traces.std()
 
     shape = (
@@ -287,7 +287,7 @@ def load_voluseg_data(path):
 
     raw_traces = cell_data['cell_timeseries'][:].astype(np.float32)
     baseline   = cell_data['cell_baseline'][:].astype(np.float32)
-    cell_traces = (raw_traces - baseline) / nex.utils.divisor(baseline)
+    cell_traces = (raw_traces - baseline) / lnk.utils.divisor(baseline)
     cell_traces = (cell_traces - cell_traces.mean()) / cell_traces.std()
     assert raw_traces.shape == cell_traces.shape == baseline.shape
 
