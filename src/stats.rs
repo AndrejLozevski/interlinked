@@ -1,7 +1,7 @@
 use pyo3::prelude::*;
 use pyo3::exceptions::PyValueError;
 use numpy::PyReadonlyArray1;
-use statrs::distribution::{ContinuousCDF, StudentsT};
+use statrs::distribution::{ContinuousCDF, StudentsT, ChiSquared};
 
 fn rank(x: &[f64]) -> Vec<f64> {
     let mut pairs: Vec<(usize, f64)> = x.iter().cloned().enumerate().collect();
@@ -35,7 +35,7 @@ fn rank(x: &[f64]) -> Vec<f64> {
 /////////////////////////////////////////////////////////////////////////////////////////
 
 #[pyfunction]
-pub fn pearson(x: PyReadonlyArray1<f64>, y: PyReadonlyArray1<f64>) -> PyResult<(f64, f64)> {
+pub fn pearson_corr(x: PyReadonlyArray1<f64>, y: PyReadonlyArray1<f64>) -> PyResult<(f64, f64)> {
     let x = x.as_slice()?;
     let y = y.as_slice()?;
     if x.len() != y.len() {
@@ -78,7 +78,7 @@ pub fn pearson(x: PyReadonlyArray1<f64>, y: PyReadonlyArray1<f64>) -> PyResult<(
 }
 
 #[pyfunction]
-pub fn spearman(x: PyReadonlyArray1<f64>, y: PyReadonlyArray1<f64>) -> PyResult<(f64, f64)> {
+pub fn spearman_corr(x: PyReadonlyArray1<f64>, y: PyReadonlyArray1<f64>) -> PyResult<(f64, f64)> {
     let x = x.as_slice()?;
     let y = y.as_slice()?;
     if x.len() != y.len() {
@@ -122,5 +122,57 @@ pub fn spearman(x: PyReadonlyArray1<f64>, y: PyReadonlyArray1<f64>) -> PyResult<
         .map_err(|e| PyValueError::new_err(format!("failed to create t distribution: {e}")))?;
     let p = 2.0 * (1.0 - st.cdf(t.abs()));
     Ok((r, p))
+}
+
+#[pyfunction]
+pub fn phi_coef(x: PyReadonlyArray1<bool>, y: PyReadonlyArray1<bool>) -> PyResult<(f64, f64)> {
+    let x = x.as_slice()?;
+    let y = y.as_slice()?;
+    if x.len() != y.len() {
+        return Err(PyValueError::new_err("x and y must have same length"));
+    }
+
+    let n = x.len() as f64;
+    if n < 3.0 {
+        return Err(PyValueError::new_err("array must contain >= 3 elements"));
+    }
+
+    let mut f11: u64 = 0;
+    let mut f00: u64 = 0;
+    let mut f10: u64 = 0;
+    let mut f01: u64 = 0;
+
+    for (&xi, &yi) in x.iter().zip(y.iter()) {
+        match (xi, yi) {
+            (true,  true)  => f11 += 1,
+            (false, false) => f00 += 1,
+            (true,  false) => f10 += 1,
+            (false, true)  => f01 += 1,
+        }
+    }
+
+    let (f11, f00, f10, f01) = (
+        f11 as f64,
+        f00 as f64,
+        f10 as f64,
+        f01 as f64
+    );
+    
+    let f1_ = f11 + f10;
+    let f0_ = f00 + f01;
+    let f_1 = f11 + f01;
+    let f_0 = f00 + f10;
+
+    let den = (f1_*f0_ * f_1*f_0).sqrt();
+    if den == 0.0 {
+        return Err(PyValueError::new_err("phi is undefined: 1+ marginal totals are zero"))};
+
+    let phi = (f11*f00 - f01*f10) / den;
+    let chi2_dist = ChiSquared::new(1.0)
+        .map_err(|e| PyValueError::new_err(format!("failed to build Chi Squared distribution {e}")))?;
+
+    let chi2_stat = n * phi * phi;
+    let p = 1.0 - chi2_dist.cdf(chi2_stat);
+    Ok((phi, p))
 }
 
