@@ -1,15 +1,16 @@
 [package]
-name = "interlinked"
+name    = "interlinked"
 version = "0.1.0"
 edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
-name = "interlinked"
+name       = "interlinked"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = { version = "0.28.2", features = ["extension-module"] }
-numpy = "0.28.0"
+pyo3    = { version = "0.28.2", features = ["extension-module"] }
+numpy   = "0.28.0"
 ndarray = "0.17"
-statrs = "0.18"
+statrs  = "0.18"
+rayon   = "1"

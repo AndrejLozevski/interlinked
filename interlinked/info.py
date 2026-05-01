@@ -2,6 +2,8 @@ import logging
 import numpy as np
 import interlinked as lnk
 
+from .interlinked import info as rs_info
+
 log = logging.getLogger(__name__)
 
 
@@ -41,6 +43,10 @@ def hist_H(counts):
     p = counts / np.sum(counts)
     p = np.clip(p, EPSILON, None)
     return -np.sum(p * np.log2(p))
+
+# Calculates entropy of a continous variable using Kozachenko-Leonenko estimator
+def KL_H(x, k=NUM_KNNS):
+    return rs_info.kl_h(x, k)
 
 
 #--| Discrete MI |----------------------------------------------------------------------#
@@ -153,7 +159,9 @@ def discrete_iMI(x, y, z, normalized=False, n_bins=NUM_BINS, bin_type=BIN_TYPE):
 
 #--| Continuous MI |--------------------------------------------------------------------#
 
-# TODO: Convert old Numba code into Rust code and reference here
+# Calculates MI of two continous variables using Kraksov-Stogbauer-Grassberger estimator
+def KSG_MI(x, y, k=NUM_KNNS): 
+    return rs_info.ksg_mi(x, y, k)
 
 
 

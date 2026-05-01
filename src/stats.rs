@@ -1,9 +1,13 @@
 use pyo3::prelude::*;
 use pyo3::exceptions::PyValueError;
 use numpy::PyReadonlyArray1;
+use ndarray::ArrayView1;
 use statrs::distribution::{ContinuousCDF, StudentsT, ChiSquared};
 
-fn rank(x: &[f64]) -> Vec<f64> {
+
+fn rank(
+    x: ArrayView1<f64>
+) -> Vec<f64> {
     let mut pairs: Vec<(usize, f64)> = x.iter().cloned().enumerate().collect();
     pairs.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
 
@@ -30,14 +34,18 @@ fn rank(x: &[f64]) -> Vec<f64> {
     ranks
 }
 
+
 /////////////////////////////////////////////////////////////////////////////////////////
 /// Python-usable scripts
 /////////////////////////////////////////////////////////////////////////////////////////
 
 #[pyfunction]
-pub fn pearson_corr(x: PyReadonlyArray1<f64>, y: PyReadonlyArray1<f64>) -> PyResult<(f64, f64)> {
-    let x = x.as_slice()?;
-    let y = y.as_slice()?;
+pub fn pearson_corr(
+    x: PyReadonlyArray1<f64>, 
+    y: PyReadonlyArray1<f64>
+) -> PyResult<(f64, f64)> {
+    let x = x.as_array();
+    let y = y.as_array();
     if x.len() != y.len() {
         return Err(PyValueError::new_err("x and y must have same length"));
     }
@@ -78,9 +86,12 @@ pub fn pearson_corr(x: PyReadonlyArray1<f64>, y: PyReadonlyArray1<f64>) -> PyRes
 }
 
 #[pyfunction]
-pub fn spearman_corr(x: PyReadonlyArray1<f64>, y: PyReadonlyArray1<f64>) -> PyResult<(f64, f64)> {
-    let x = x.as_slice()?;
-    let y = y.as_slice()?;
+pub fn spearman_corr(
+    x: PyReadonlyArray1<f64>, 
+    y: PyReadonlyArray1<f64>
+) -> PyResult<(f64, f64)> {
+    let x = x.as_array();
+    let y = y.as_array();
     if x.len() != y.len() {
         return Err(PyValueError::new_err("x and y must have same length"));
     }
@@ -125,9 +136,12 @@ pub fn spearman_corr(x: PyReadonlyArray1<f64>, y: PyReadonlyArray1<f64>) -> PyRe
 }
 
 #[pyfunction]
-pub fn phi_coef(x: PyReadonlyArray1<bool>, y: PyReadonlyArray1<bool>) -> PyResult<(f64, f64)> {
-    let x = x.as_slice()?;
-    let y = y.as_slice()?;
+pub fn phi_coef(
+    x: PyReadonlyArray1<bool>, 
+    y: PyReadonlyArray1<bool>
+) -> PyResult<(f64, f64)> {
+    let x = x.as_array();
+    let y = y.as_array();
     if x.len() != y.len() {
         return Err(PyValueError::new_err("x and y must have same length"));
     }
