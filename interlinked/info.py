@@ -46,6 +46,7 @@ def hist_H(counts):
 
 # Calculates entropy of a continous variable using Kozachenko-Leonenko estimator
 def KL_H(x, k=NUM_KNNS):
+    x = np.asarray(x, dtype=np.float64)
     return rs_info.kl_h(x, k)
 
 
@@ -161,7 +162,22 @@ def discrete_iMI(x, y, z, normalized=False, n_bins=NUM_BINS, bin_type=BIN_TYPE):
 
 # Calculates MI of two continous variables using Kraksov-Stogbauer-Grassberger estimator
 def KSG_MI(x, y, k=NUM_KNNS): 
+    x = x.asarray(x, dtype=np.float64)
+    y = y.asarray(y, dtype=np.float64)
     return rs_info.ksg_mi(x, y, k)
 
+# Calculates conditional MI of two continous variables given a third variable using Kraksov-Stogbauer-Grassberger estimator
+def KSG_CMI(x, y, z, k=NUM_KNNS): 
+    x = x.asarray(x, dtype=np.float64)
+    y = y.asarray(y, dtype=np.float64)
+    z = z.asarray(z, dtype=np.float64)
+    return rs_info.ksg_cmi(x, y, z, k)
+
+# Calculates interaction information of three continous variables using Kraksov-Stogbauer-Grassberger estimator
+def KSG_CMI(x, y, z, k=NUM_KNNS): 
+    x = x.asarray(x, dtype=np.float64)
+    y = y.asarray(y, dtype=np.float64)
+    z = z.asarray(z, dtype=np.float64)
+    return rs_info.ksg_ii(x, y, z, k)
 
 
