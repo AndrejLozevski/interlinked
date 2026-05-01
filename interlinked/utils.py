@@ -6,12 +6,21 @@ import scipy as sp
 from pathlib import Path
 from datetime import datetime
 
+import interlinked as lnk
+
 log = logging.getLogger(__name__)
 
 
+#--| Constants |------------------------------------------------------------------------#
+
+LOGGING_LEVEL    = lnk.config.LOGGING_LEVEL
+LOGGING_DATETIME = lnk.config.LOGGING_DATETIME
+
+#--| Functions |------------------------------------------------------------------------#
+
 # Formats the tqdm progress bar to match logging format
-def format_log(desc, tag='INFO'):
-    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S,%f')[:-3]
+def format_log(desc, tag=LOGGING_LEVEL):
+    timestamp = datetime.now().strftime(LOGGING_DATETIME)[:-3]
     return f'{timestamp} [{tag}] - {desc}'
 
 # Digitizes data into n bins

@@ -7,8 +7,11 @@ log = logging.getLogger(__name__)
 
 #--| Constants |------------------------------------------------------------------------#
 
+BIN_TYPE = 'fixed'
 NUM_BINS = lnk.config.NUM_BINS
+NUM_KNNS = lnk.config.NUM_KNNS
 
+EPSILON = 1e-10
 
 #--| Utilities |------------------------------------------------------------------------#
 
@@ -36,19 +39,28 @@ def _bins(path, new=False):
 # Calculates entropy of a histogram
 def hist_H(counts):
     p = counts / np.sum(counts)
-    p = np.clip(p, 1e-10, None)
+    p = np.clip(p, EPSILON, None)
     return -np.sum(p * np.log2(p))
 
 
 #--| Discrete MI |----------------------------------------------------------------------#
 
 # Calculates Mutual Information between two discrete variables
-def disc_MI(x, y, normalized=False, bins=NUM_BINS):
-    bins = _bins(bins, 2, x, y)
+def disc_MI(x, y, normalized=False, n_bins=NUM_BINS, bin_type=BIN_TYPE):
+    n_bins = _bins(n_bins, 2, x, y)
 
-    hist_xy = np.histogram2d(x, y, bins=(bins[0], bins[1]))[0]
-    hist_x  = np.histogram(x, bins=bins[0])[0]
-    hist_y  = np.histogram(y, bins=bins[1])[0]
+    if bin_type == 'fixed':
+        bins_x, bins_y = n_bins
+    elif bin_type == 'quantile':
+        bins_x = lnk.stats.quantile_bins(x, n_bins[0])        
+        bins_y = lnk.stats.quantile_bins(y, n_bins[1])        
+    else:
+        log.error("Invalid bin type: '%s'", bin_type)
+        sys.exit(1)
+
+    hist_xy = np.histogram2d(x, y, bins=(bins_x, bins_y))[0]
+    hist_x  = np.sum(hist_xy, axis=0)
+    hist_y  = np.sum(hist_xy, axis=1)
 
     Hxy = hist_H(hist_xy)
     Hx  = hist_H(hist_x)
@@ -64,14 +76,24 @@ def disc_MI(x, y, normalized=False, bins=NUM_BINS):
     return MI
 
 # Calculates Conditional Mutual Information between two discrete variables
-def discrete_cMI(x, y, z, normalized=False, bins=NUM_BINS):
-    bins = _bins(bins, 3, x, y, z)
-
+def discrete_cMI(x, y, z, normalized=False, n_bins=NUM_BINS, bin_type=BIN_TYPE):
+    n_bins = _bins(n_bins, 3, x, y, z)
     data = np.column_stack((x, y, z))
-    hist_xyz = np.histogramdd(data, bins=(bins[0], bins[1], bins[2]))[0]
-    hist_xz  = np.histogram2d(x, z, bins=(bins[0], bins[2]))[0]
-    hist_yz  = np.histogram2d(y, z, bins=(bins[1], bins[2]))[0]
-    hist_z   = np.histogram(z, bins=bins[2])[0]
+
+    if bin_type == 'fixed':
+        bins_x, bins_y, bins_z = n_bins
+    elif bin_type == 'quantile':
+        bins_x = lnk.stats.quantile_bins(x, n_bins[0])        
+        bins_y = lnk.stats.quantile_bins(y, n_bins[1])        
+        bins_z = lnk.stats.quantile_bins(z, n_bins[2])        
+    else:
+        log.error("Invalid bin type: '%s'", bin_type)
+        sys.exit(1)
+
+    hist_xyz = np.histogramdd(data, bins=(bins_x, bins_y, bins_z))[0]
+    hist_xz  = np.sum(hist_xyz, axis=1)
+    hist_yz  = np.sum(hist_xyz, axis=0)
+    hist_z   = np.sum(hist_xz,  axis=0)
 
     Hxyz = hist_H(hist_xyz)
     Hxz  = hist_H(hist_xz)
@@ -90,17 +112,27 @@ def discrete_cMI(x, y, z, normalized=False, bins=NUM_BINS):
     return cMI
 
 # Calculates Interaction Information between three discrete variables
-def discrete_iMI(x, y, z, normalized=False, bins=NUM_BINS):
-    bins = _bins(bins, 3, x, y, z)
-
+def discrete_iMI(x, y, z, normalized=False, n_bins=NUM_BINS, bin_type=BIN_TYPE):
+    n_bins = _bins(n_bins, 3, x, y, z)
     data = np.column_stack((x, y, z))
-    hist_xyz = np.histogramdd(data, bins=(bins[0], bins[1], bins[2]))[0]
-    hist_xy  = np.histogram2d(x, y, bins=(bins[0], bins[1]))[0]
-    hist_xz  = np.histogram2d(x, z, bins=(bins[0], bins[2]))[0]
-    hist_yz  = np.histogram2d(y, z, bins=(bins[1], bins[2]))[0]
-    hist_x   = np.histogram(x, bins=bins[0])[0]
-    hist_y   = np.histogram(y, bins=bins[1])[0]
-    hist_z   = np.histogram(z, bins=bins[2])[0]
+
+    if bin_type == 'fixed':
+        bins_x, bins_y, bins_z = n_bins
+    elif bin_type == 'quantile':
+        bins_x = lnk.stats.quantile_bins(x, n_bins[0])        
+        bins_y = lnk.stats.quantile_bins(y, n_bins[1])        
+        bins_z = lnk.stats.quantile_bins(z, n_bins[2])        
+    else:
+        log.error("Invalid bin type: '%s'", bin_type)
+        sys.exit(1)
+
+    hist_xyz = np.histogramdd(data, bins=(bins_x, bins_y, bins_z))[0]
+    hist_xy  = np.sum(hist_xyz, axis=2)
+    hist_xz  = np.sum(hist_xyz, axis=1)
+    hist_yz  = np.sum(hist_xyz, axis=0)
+    hist_x   = np.sum(hist_xy,  axis=1)
+    hist_y   = np.sum(hist_xy,  axis=0)
+    hist_z   = np.sum(hist_xz,  axis=0)
 
     Hxyz = hist_H(hist_xyz)
     Hxy  = hist_H(hist_xy)

@@ -8,6 +8,7 @@ from . import io
 
 add = interlinked.add
 __all__ = [
+#    'interlinked',
     'add', 
     'config',
     'utils', 

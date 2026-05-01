@@ -244,7 +244,7 @@ def load_suite2p_data(path):
     ops            = np.load(path / 'ops.npy',  allow_pickle=True).item()
 
     baseline = np.percentile(cell_traces, 20, axis=1, keepdims=True)
-    cell_traces = (cell_traces - baseline) / lnk.utils.divisor(baseline)
+    cell_traces = (cell_traces - baseline) / np.abs(lnk.utils.divisor(baseline))
     cell_traces = (cell_traces - cell_traces.mean()) / cell_traces.std()
 
     shape = (
@@ -287,7 +287,7 @@ def load_voluseg_data(path):
 
     raw_traces = cell_data['cell_timeseries'][:].astype(np.float32)
     baseline   = cell_data['cell_baseline'][:].astype(np.float32)
-    cell_traces = (raw_traces - baseline) / lnk.utils.divisor(baseline)
+    cell_traces = (raw_traces - baseline) / np.abs(lnk.utils.divisor(baseline))
     cell_traces = (cell_traces - cell_traces.mean()) / cell_traces.std()
     assert raw_traces.shape == cell_traces.shape == baseline.shape
 
@@ -302,6 +302,33 @@ def load_voluseg_data(path):
         bmap.shape[2]            # Lx, length X
     )
     return rois, cell_traces, bmap, shape
+
+
+#--| Combined Data |---------------------------------------------------------------------#
+
+# Ensures that the provided path is the Suite2p combined directory
+def ensure_combined_path(path):
+    path = _path(path)
+    needed_files = ['combined_segdata.h5']
+    for file in needed_files:
+        if path / file not in list(path.iterdir()):
+            log.error("File '%s' not found in %s", file, path)
+            sys.exit(1)
+    return path
+
+# Loads VoluSeg data from the given path
+def load_combined_data(path, metadata=False):
+    path = ensure_combined_path(path)
+
+    with h5py.File(path / 'combined_segdata.h5', 'r') as file:
+        rois = file['rois'][:]
+        cell_traces = file['traces'][:]
+        bmap = file['bmap'][:]
+        shape = file['shape'][:]
+        if metadata:
+            metadata = file['metadata'][:]
+            return rois, cell_traces, bmap, shape, metadata
+        return rois, cell_traces, bmap, shape
 
 
 #--| Trials |---------------------------------------------------------------------------#
