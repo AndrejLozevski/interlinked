@@ -7,15 +7,15 @@ from pathlib import Path
 ##################################################
 
 # Utils parameters
-LOGGING_LEVEL:    str = 'INFO'
-LOGGING_FORMAT:   str = '%(asctime)s [%(levelname)s] - %(message)s'
-LOGGING_DATETIME: str = '%Y-%m-%d %H:%M:%S,%f'
+LOGGING_LEVEL:    str = "INFO"
+LOGGING_FORMAT:   str = "%(asctime)s [%(levelname)s] - %(message)s"
+LOGGING_DATETIME: str = "%Y-%m-%d %H:%M:%S,%f"
 
 # IO parameters
-ZBRAIN_PATH:      Path = Path('...')
-TEMP_DIRECTORY:   Path = Path('/tmp/interlinked')
-TEMP_FILE_PREFIX: str  = '__temp__'
-TEMP_FILE_SUFFIX: str  = '.dat'
+ZBRAIN_PATH:      Path = Path("...")
+TEMP_DIRECTORY:   Path = Path("/tmp/interlinked")
+TEMP_FILE_PREFIX: str  = "__temp__"
+TEMP_FILE_SUFFIX: str  = ".dat"
 CLEAR_TEMP:       bool = False
 
 # Parallel parameters

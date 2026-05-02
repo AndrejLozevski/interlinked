@@ -21,7 +21,7 @@ LOGGING_DATETIME = lnk.config.LOGGING_DATETIME
 # Formats the tqdm progress bar to match logging format
 def format_log(desc, tag=LOGGING_LEVEL):
     timestamp = datetime.now().strftime(LOGGING_DATETIME)[:-3]
-    return f'{timestamp} [{tag}] - {desc}'
+    return f"{timestamp} [{tag}] - {desc}"
 
 # Digitizes data into n bins
 def digitize(data, n, dtype=np.int32):
@@ -34,7 +34,7 @@ def dff(raw, downsample=1, percentile=20, window=300):
     if downsample == 1:
         baseline = sp.ndimage.filters.percentile_filter(raw, percentile=percentile, size=window)
     else:
-        decimated = sp.signal.decimate(raw, downsample, ftype='iir', zero_phase=True)
+        decimated = sp.signal.decimate(raw, downsample, ftype="iir", zero_phase=True)
         decimated += raw.min() - decimated.min()
         baseline = sp.ndimage.filters.percentile_filter(decimated, percentile=percentile, size=window//downsample)
 
@@ -54,8 +54,8 @@ def decay(data, tau=2.00, width=16, inv=False):
     krnl = tau ** np.arange(width)
     krnl = np.exp(-np.arange(width) / tau)
     if inv:
-        return np.convolve(data[::-1], krnl, mode='full')[:len(data)][::-1]
-    return np.convolve(data, krnl, mode='full')[:len(data)]
+        return np.convolve(data[::-1], krnl, mode="full")[:len(data)][::-1]
+    return np.convolve(data, krnl, mode="full")[:len(data)]
 
 def exponential_decay(Lt, A, tau, C):
     return A * np.exp(-Lt / tau) + C    

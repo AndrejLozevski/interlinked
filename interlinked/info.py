@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 
 #--| Constants |------------------------------------------------------------------------#
 
-BIN_TYPE = 'fixed'
+BIN_TYPE = "fixed"
 NUM_BINS = lnk.config.NUM_BINS
 NUM_KNNS = lnk.config.NUM_KNNS
 
@@ -23,7 +23,7 @@ def _bins(path, new=False):
         bins = (bins, bins) if num == 2 else (bins, bins, bins)
     elif isinstance(bins, (tuple, list)):
         if len(bins) != num:
-            log.error('Must provide 1 bin count or a list of %s bin counts', num)
+            log.error("Must provide 1 bin count or a list of %s bin counts", num)
             sys.exit(1)
     if num == 2:
         bins = np.minimum(bins, (len(np.unique(x)), len(np.unique(y))))
@@ -31,7 +31,7 @@ def _bins(path, new=False):
         assert z is not None
         bins = np.minimum(bins, (len(np.unique(x)), len(np.unique(y)), len(np.unique(z))))
     else:
-        log.error('Invalid variable count: %s', num)
+        log.error("Invalid variable count: %s", num)
         sys.exit(1)
     return bins
 
@@ -56,9 +56,9 @@ def KL_H(x, k=NUM_KNNS):
 def disc_MI(x, y, normalized=False, n_bins=NUM_BINS, bin_type=BIN_TYPE):
     n_bins = _bins(n_bins, 2, x, y)
 
-    if bin_type == 'fixed':
+    if bin_type == "fixed":
         bins_x, bins_y = n_bins
-    elif bin_type == 'quantile':
+    elif bin_type == "quantile":
         bins_x = lnk.stats.quantile_bins(x, n_bins[0])        
         bins_y = lnk.stats.quantile_bins(y, n_bins[1])        
     else:
@@ -87,9 +87,9 @@ def discrete_cMI(x, y, z, normalized=False, n_bins=NUM_BINS, bin_type=BIN_TYPE):
     n_bins = _bins(n_bins, 3, x, y, z)
     data = np.column_stack((x, y, z))
 
-    if bin_type == 'fixed':
+    if bin_type == "fixed":
         bins_x, bins_y, bins_z = n_bins
-    elif bin_type == 'quantile':
+    elif bin_type == "quantile":
         bins_x = lnk.stats.quantile_bins(x, n_bins[0])        
         bins_y = lnk.stats.quantile_bins(y, n_bins[1])        
         bins_z = lnk.stats.quantile_bins(z, n_bins[2])        
@@ -123,9 +123,9 @@ def discrete_iMI(x, y, z, normalized=False, n_bins=NUM_BINS, bin_type=BIN_TYPE):
     n_bins = _bins(n_bins, 3, x, y, z)
     data = np.column_stack((x, y, z))
 
-    if bin_type == 'fixed':
+    if bin_type == "fixed":
         bins_x, bins_y, bins_z = n_bins
-    elif bin_type == 'quantile':
+    elif bin_type == "quantile":
         bins_x = lnk.stats.quantile_bins(x, n_bins[0])        
         bins_y = lnk.stats.quantile_bins(y, n_bins[1])        
         bins_z = lnk.stats.quantile_bins(z, n_bins[2])        

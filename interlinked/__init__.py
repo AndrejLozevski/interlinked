@@ -9,14 +9,13 @@ from . import io
 
 add = interlinked.add
 __all__ = [
-#    'interlinked',
-    'add', 
-    'config',
-    'utils', 
-    'stats', 
-    'form',
-    'draw',
-    'info',
-    'io',
+    "add", 
+    "config",
+    "utils", 
+    "stats", 
+    "form",
+    "draw",
+    "info",
+    "io",
 ]
 

@@ -63,9 +63,9 @@ def label_rois(stat, shape):
     count = 0
     rois = np.zeros((Lz,Ly,Lx), np.int32)
     for n in range(Ln):
-        ypix = stat[n]['ypix']    
-        xpix = stat[n]['xpix']    
-        zpln = stat[n]['iplane']    
+        ypix = stat[n]["ypix"]    
+        xpix = stat[n]["xpix"]    
+        zpln = stat[n]["iplane"]    
         assert len(ypix) == len(xpix)
 
         for py, px in zip(ypix, xpix):
@@ -78,7 +78,7 @@ def adjust_rois(arr):
     uniq = np.unique(arr)
     uniq = uniq[uniq != -1]
     if uniq.size == 0:
-        log.error('No labels found in array')
+        log.error("No labels found in array")
         sys.exit(1)
     assert all(uniq >= 0)
     uniq = uniq.astype(np.int64)

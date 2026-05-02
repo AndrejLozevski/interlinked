@@ -52,5 +52,7 @@ if __name__ == '__main__':
     swim = lnk.io.load_file(bdir, 'swimbout*')
     log.info('Behavior data loaded')
 
+    #-----------------------------------------------------------------------------------#
 
+    #...work...
 

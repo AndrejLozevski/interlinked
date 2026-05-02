@@ -108,7 +108,7 @@ if __name__ == '__main__':
     lnk.form.validate_rois(rois, Lc)
     log.info('Removed invariant ROIs. Lc: %s', Lc)
    
-    count = 1_000_000
+    count = 1_000
     rand1 = np.random.randint(0, Lc, size=count)
     rand2 = np.random.randint(0, Lc, size=count)
     vals = np.zeros(len(rand1), np.float32)
