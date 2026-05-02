@@ -14,3 +14,5 @@ numpy   = "0.28.0"
 ndarray = "0.17"
 statrs  = "0.18"
 rayon   = "1"
+kiddo   = "4"
+

@@ -161,23 +161,23 @@ def discrete_iMI(x, y, z, normalized=False, n_bins=NUM_BINS, bin_type=BIN_TYPE):
 #--| Continuous MI |--------------------------------------------------------------------#
 
 # Calculates MI of two continous variables using Kraksov-Stogbauer-Grassberger estimator
-def KSG_MI(x, y, k=NUM_KNNS): 
-    x = x.asarray(x, dtype=np.float64)
-    y = y.asarray(y, dtype=np.float64)
-    return rs_info.ksg_mi(x, y, k)
+def KSG_MI(x, y, k=NUM_KNNS, normalize=True): 
+    x = np.asarray(x, dtype=np.float64)
+    y = np.asarray(y, dtype=np.float64)
+    return rs_info.ksg_mi(x, y, k, normalize)
 
 # Calculates conditional MI of two continous variables given a third variable using Kraksov-Stogbauer-Grassberger estimator
-def KSG_CMI(x, y, z, k=NUM_KNNS): 
-    x = x.asarray(x, dtype=np.float64)
-    y = y.asarray(y, dtype=np.float64)
-    z = z.asarray(z, dtype=np.float64)
-    return rs_info.ksg_cmi(x, y, z, k)
+def KSG_CMI(x, y, z, k=NUM_KNNS, normalize=True): 
+    x = np.asarray(x, dtype=np.float64)
+    y = np.asarray(y, dtype=np.float64)
+    z = np.asarray(z, dtype=np.float64)
+    return rs_info.ksg_cmi(x, y, z, k, normalize)
 
 # Calculates interaction information of three continous variables using Kraksov-Stogbauer-Grassberger estimator
-def KSG_CMI(x, y, z, k=NUM_KNNS): 
-    x = x.asarray(x, dtype=np.float64)
-    y = y.asarray(y, dtype=np.float64)
-    z = z.asarray(z, dtype=np.float64)
-    return rs_info.ksg_ii(x, y, z, k)
+def KSG_CMI(x, y, z, k=NUM_KNNS, normalize=True): 
+    x = np.asarray(x, dtype=np.float64)
+    y = np.asarray(y, dtype=np.float64)
+    z = np.asarray(z, dtype=np.float64)
+    return rs_info.ksg_ii(x, y, z, k, normalize)
 
 

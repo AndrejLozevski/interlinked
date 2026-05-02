@@ -1,4 +1,6 @@
+import os
 from pathlib import Path
+
 
 ##################################################
 #               Default parameters               # 
@@ -11,7 +13,7 @@ LOGGING_DATETIME: str = '%Y-%m-%d %H:%M:%S,%f'
 
 # IO parameters
 ZBRAIN_PATH:      Path = Path('...')
-TEMP_DIRECTORY:   Path = Path('...')
+TEMP_DIRECTORY:   Path = Path('/tmp/interlinked')
 TEMP_FILE_PREFIX: str  = '__temp__'
 TEMP_FILE_SUFFIX: str  = '.dat'
 CLEAR_TEMP:       bool = False
@@ -39,6 +41,14 @@ NUM_MONTE_CARLO: int   = 1_000_000
 
 # Graph parameters
 RADIUS:     int  = 10
+MIN_SIZE:   int  = 5
 NORMALIZE:  bool = False
 CLIP_EDGES: bool = False
+
+
+##################################################
+#             Initialize Parameters              # 
+##################################################
+
+os.makedirs(TEMP_DIRECTORY, exist_ok=True)
 

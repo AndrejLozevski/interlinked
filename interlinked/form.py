@@ -76,21 +76,25 @@ def label_rois(stat, shape):
 # Shifts ROIs in a labeled array to fill any missing label IDs
 def adjust_rois(arr):
     uniq = np.unique(arr)
-    uniq = uniq[uniq != uniq.min()]
+    uniq = uniq[uniq != -1]
     if uniq.size == 0:
         log.error('No labels found in array')
         sys.exit(1)
+    assert all(uniq >= 0)
+    uniq = uniq.astype(np.int64)
 
-    lmin = uniq.min()
-    lmax = uniq.max()
+    lmin = 0
+    lmax = int(uniq.max())
 
+    offset = lmin
     lut = np.arange(lmax - lmin + 1, dtype=arr.dtype)
     lut[:] = -999
-    lut[uniq - lmin] = np.arange(len(uniq)) + lmin
+    lut[uniq - offset] = np.arange(len(uniq)) + offset
     
     out = arr.copy()
     mask = (arr >= lmin) & (arr <= lmax)
-    out[mask] = lut[arr[mask] - lmin]
+    out_vals = arr[mask] - offset
+    out[mask] = lut[out_vals.astype(np.int64)]
 
     full = np.arange(lmin, lmax+1)
     mask = np.in1d(full, uniq, assume_unique=True)
