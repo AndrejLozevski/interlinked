@@ -13,14 +13,14 @@ log = logging.getLogger(__name__)
 
 #--| Constants |------------------------------------------------------------------------#
 
-LOGGING_LEVEL    = lnk.config.LOGGING_LEVEL
-LOGGING_DATETIME = lnk.config.LOGGING_DATETIME
+LOG_LEVEL    = "INFO"
+LOG_DATETIME = "%Y-%m-%d %H:%M:%S,%f"
 
 #--| Functions |------------------------------------------------------------------------#
 
 # Formats the tqdm progress bar to match logging format
-def format_log(desc, tag=LOGGING_LEVEL):
-    timestamp = datetime.now().strftime(LOGGING_DATETIME)[:-3]
+def format_log(desc, tag=LOG_LEVEL):
+    timestamp = datetime.now().strftime(LOG_DATETIME)[:-3]
     return f"{timestamp} [{tag}] - {desc}"
 
 # Digitizes data into n bins

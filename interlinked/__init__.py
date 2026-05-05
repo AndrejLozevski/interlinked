@@ -1,15 +1,19 @@
-from . import interlinked
-from . import config
-from . import utils
-from . import stats
-from . import form
-from . import draw
-from . import info
-from . import io
+import logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] - %(message)s")
 
-add = interlinked.add
+
+
+from .       import meta
+from .config import config
+from .       import utils
+from .       import stats
+from .       import form
+from .       import draw
+from .       import info
+from .       import io
+
 __all__ = [
-    "add", 
+    "meta",
     "config",
     "utils", 
     "stats", 

@@ -21,10 +21,6 @@ log = logging.getLogger(__name__)
 
 #--| Constants |------------------------------------------------------------------------#
 
-TEMP_DIRECTORY = lnk.config.TEMP_DIRECTORY
-PREFIX         = lnk.config.TEMP_FILE_PREFIX
-SUFFIX         = lnk.config.TEMP_FILE_SUFFIX
-
 TIF2D = {"imagej":True, "metadata":{"axes": "YX"}}
 TIF3D = {"imagej":True, "metadata":{"axes":"ZYX"}}
 
@@ -36,7 +32,7 @@ def _path(path, new=False):
     if type(path) == str:
         path = Path(path)
     if (not new) and (not path.exists()):
-        log.error("Path '%s' does not exist", path)
+        lnk.meta.Error("Path '%s' does not exist", path, error=FileNotFoundError)
         sys.exit(1)
     return path
 
@@ -46,10 +42,10 @@ def find_file(path, pattern):
 
     files = list(path.glob(pattern))
     if len(files) == 0:
-        log.error("No '%s' file found in '%s'", pattern, path)
+        lnk.meta.Error("No '%s' file found in '%s'", pattern, path, error=FileNotFoundError)
         sys.exit(1)
     if len(files) > 1:
-        log.error("Found %s file(s) with the pattern '%s' in '%s'", len(files), pattern, path)
+        lnk.meta.Error("Found %s file(s) with the pattern '%s' in '%s'", len(files), pattern, path)
         sys.exit(1)
 
     file = files[0]
@@ -67,34 +63,31 @@ def load_file(path, pattern, pickled=False):
     elif file.suffix in [".h5", ".hdf5"]:
         data = h5py.File(file, "r")
     else:
-        log.error("Unrecognized file extension: '%s'", file.suffix)
+        lnk.meta.Error("Unrecognized file extension: '%s'", file.suffix)
         sys.exit(1)
     return data
 
 # Creates temporary filename (for memmap files)
 def temp_filepath():
-    prefix = PREFIX
-    suffix = SUFFIX
     temp_id = uuid.uuid4()
-
-    filepath = TEMP_DIRECTORY / f"{prefix}{temp_id}{suffix}"
+    filepath = lnk.config.TEMP_DIR / f"{lnk.config.TEMP_PREFIX}{temp_id}{lnk.config.TEMP_SUFFIX}"
     return filepath
 
 # Safely deletes temporary memmap files from the temp directory (VERY STRICT)
 def safely_delete(path):
     path = _path(path)
-    temp_dir = TEMP_DIRECTORY
-    prefix = PREFIX
-    suffix = SUFFIX
+    temp_dir = lnk.config.TEMP_DIR
+    prefix = lnk.config.TEMP_PREFIX
+    suffix = lnk.config.TEMP_SUFFIX
 
     if not path.parent == temp_dir:
-        log.error("File directory '%s' doesn\'t match the /temp directory '%s'", path.parent, temp_dir)
+        lnk.meta.Error("File directory '%s' doesn\'t match the /temp directory '%s'", path.parent, temp_dir)
         sys.exit(1)
     elif not str(path.name).startswith(prefix):
-        log.error("File name '%s' doesn\'t start with the expected prefix '%s'", path.parent, temp_dir)
+        lnk.meta.Error("File name '%s' doesn\'t start with the expected prefix '%s'", path.parent, temp_dir)
         sys.exit(1)
     elif not path.suffix == suffix:
-        log.error("File extension '%s' doesn\'t match the expected suffix '%s'", path.suffix, suffix)
+        lnk.meta.Error("File extension '%s' doesn\'t match the expected suffix '%s'", path.suffix, suffix)
         sys.exit(1)
     else:
         os.remove(path)
@@ -102,7 +95,7 @@ def safely_delete(path):
 
 # Checks for leftover temporary files
 def check_temp(clear=False):
-    files = list(TEMP_DIRECTORY.iterdir())
+    files = list(lnk.config.TEMP_DIR.iterdir())
     if len(files) > 0:
         if clear:
             clear_temp(False)
@@ -113,7 +106,7 @@ def check_temp(clear=False):
 
 # Clears leftover temporary files
 def clear_temp(notify=True):
-    files = list(TEMP_DIRECTORY.iterdir())
+    files = list(lnk.config.TEMP_DIR.iterdir())
     if len(files) > 0:
         for file in files:
             safely_delete(file)
@@ -168,7 +161,7 @@ def load_resolution(path):
         if (Rz := info.get("z_step")) is not None:
             return float(Rz), Ry, Rx
     else:
-        log.error("No 'z_step' tag found in '%s'", file.name)
+        lnk.meta.Error("No 'z_step' tag found in '%s'", file.name, error=KeyError)
         sys.exit(1)
     return
 
@@ -190,13 +183,13 @@ def ensure_suite2p_path(path):
     if (path / "combined").exists():
         path = path / "combined"
     if path.name != "combined":
-        log.error("No suite2p combined directory found at %s", path)
+        lnk.meta.Error("No suite2p combined directory found at %s", path, error=FileNotFoundError)
         sys.exit(1)
 
     needed_files = ["stat.npy", "F.npy", "ops.npy"]
     for file in needed_files:
         if path / file not in list(path.iterdir()):
-            log.error("file '%s' not found in %s", file, path)
+            lnk.meta.Error("file '%s' not found in %s", file, path, error=FileNotFoundError)
             sys.exit(1)
     return path
 
@@ -268,13 +261,13 @@ def ensure_voluseg_path(path):
     if (path / "voluseg").exists():
         path = path / "voluseg"
     if path.name != "voluseg":
-        log.error("No voluseg directory found at %s", path)
+        lnk.meta.Error("No voluseg directory found at %s", path, error=FileNotFoundError)
         sys.exit(1)
 
     needed_files = ["cells0_clean.hdf5", "volume0.hdf5"]
     for file in needed_files:
         if path / file not in list(path.iterdir()):
-            log.error("File '%s' not found in %s", file, path)
+            lnk.meta.Error("File '%s' not found in %s", file, path, error=FileNotFoundError)
             sys.exit(1)
     return path
 
@@ -312,7 +305,7 @@ def ensure_combined_path(path):
     needed_files = ["combined_segdata.h5"]
     for file in needed_files:
         if path / file not in list(path.iterdir()):
-            log.error("File '%s' not found in %s", file, path)
+            lnk.meta.Error("File '%s' not found in %s", file, path, error=FileNotFoundError)
             sys.exit(1)
     return path
 

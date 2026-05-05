@@ -23,16 +23,14 @@ def _bins(path, new=False):
         bins = (bins, bins) if num == 2 else (bins, bins, bins)
     elif isinstance(bins, (tuple, list)):
         if len(bins) != num:
-            log.error("Must provide 1 bin count or a list of %s bin counts", num)
-            sys.exit(1)
+            lnk.meta.Error("Must provide 1 bin count or a list of %s bin counts", num, error=ValueError)
     if num == 2:
         bins = np.minimum(bins, (len(np.unique(x)), len(np.unique(y))))
     elif num == 3:
         assert z is not None
         bins = np.minimum(bins, (len(np.unique(x)), len(np.unique(y)), len(np.unique(z))))
     else:
-        log.error("Invalid variable count: %s", num)
-        sys.exit(1)
+        lnk.meta.Error("Invalid bin count: %s", num, error=ValueError)
     return bins
 
 
@@ -62,8 +60,7 @@ def disc_MI(x, y, normalized=False, n_bins=NUM_BINS, bin_type=BIN_TYPE):
         bins_x = lnk.stats.quantile_bins(x, n_bins[0])        
         bins_y = lnk.stats.quantile_bins(y, n_bins[1])        
     else:
-        log.error("Invalid bin type: '%s'", bin_type)
-        sys.exit(1)
+        lnk.meta.Error("Invalid bin type: '%s'", bin_type, error=ValueError)
 
     hist_xy = np.histogram2d(x, y, bins=(bins_x, bins_y))[0]
     hist_x  = np.sum(hist_xy, axis=0)
@@ -94,8 +91,7 @@ def discrete_cMI(x, y, z, normalized=False, n_bins=NUM_BINS, bin_type=BIN_TYPE):
         bins_y = lnk.stats.quantile_bins(y, n_bins[1])        
         bins_z = lnk.stats.quantile_bins(z, n_bins[2])        
     else:
-        log.error("Invalid bin type: '%s'", bin_type)
-        sys.exit(1)
+        lnk.meta.Error("Invalid bin type: '%s'", bin_type, error=ValueError)
 
     hist_xyz = np.histogramdd(data, bins=(bins_x, bins_y, bins_z))[0]
     hist_xz  = np.sum(hist_xyz, axis=1)
@@ -130,8 +126,7 @@ def discrete_iMI(x, y, z, normalized=False, n_bins=NUM_BINS, bin_type=BIN_TYPE):
         bins_y = lnk.stats.quantile_bins(y, n_bins[1])        
         bins_z = lnk.stats.quantile_bins(z, n_bins[2])        
     else:
-        log.error("Invalid bin type: '%s'", bin_type)
-        sys.exit(1)
+        lnk.meta.Error("Invalid bin type: '%s'", bin_type, error=ValueError)
 
     hist_xyz = np.histogramdd(data, bins=(bins_x, bins_y, bins_z))[0]
     hist_xy  = np.sum(hist_xyz, axis=2)

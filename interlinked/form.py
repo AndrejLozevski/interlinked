@@ -78,8 +78,7 @@ def adjust_rois(arr):
     uniq = np.unique(arr)
     uniq = uniq[uniq != -1]
     if uniq.size == 0:
-        log.error("No labels found in array")
-        sys.exit(1)
+        lnk.meta.error("No labels found in array", error=ValueError)
     assert all(uniq >= 0)
     uniq = uniq.astype(np.int64)
 
@@ -116,21 +115,16 @@ def remove_rois(arr, rois, keep=False):
 # Ensures ROIs in a labeled array are valid and without gaps
 def validate_rois(rois, Lc=0):
     if not rois.min() == -1:
-        log.error("Background label should be -1, but found: (Min: %s)", rois.min())
-        sys.exit(1)
+        lnk.meta.Error("Background label should be -1, but found: (Min: %s)", rois.min(), error=ValueError)
     if not len(np.unique(rois)) == rois.max()+2:
-        log.error("Unique label count should be two more than max label, but found: (Unique: %s, Max: %s)", len(np.unique(rois)), rois.max())
-        sys.exit(1)
+        lnk.meta.Error("Unique label count should be two more than max label, but found: (Unique: %s, Max: %s)", len(np.unique(rois)), rois.max(), error=ValueError)
     if Lc != 0:
         if not rois.max() == Lc-1:
-            log.error("Max label should be one more than roi count, but found: (Max: %s, Lc: %s)", rois.max(), Lc)
-            sys.exit(1)
+            lnk.meta.Error("Max label should be one more than roi count, but found: (Max: %s, Lc: %s)", rois.max(), Lc, error=ValueError)
         if not rois.max() - rois.min() == Lc:
-            log.error("Max label minus min label should equal roi count, but found: (Max: %s, Min: %s, Lc: %s)", rois.max(), rois.min(), Lc)
-            sys.exit(1)
+            lnk.meta.Error("Max label minus min label should equal roi count, but found: (Max: %s, Min: %s, Lc: %s)", rois.max(), rois.min(), Lc, error=ValueError)
         if not len(np.unique(rois)) == Lc+1:
-            log.error("Unique label count should one more than roi count, but found: (Max: %s, Min: %s, Lc: %s)", rois.max(), rois.min(), Lc)
-            sys.exit(1)
+            lnk.meta.Error("Unique label count should one more than roi count, but found: (Max: %s, Min: %s, Lc: %s)", rois.max(), rois.min(), Lc, error=ValueError)
     return
 
 

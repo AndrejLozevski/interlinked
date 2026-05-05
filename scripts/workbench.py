@@ -11,7 +11,6 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 from pathlib import Path
 
-logging.basicConfig(level=logging.INFO, format=lnk.config.LOGGING_FORMAT)
 log = logging.getLogger(__name__)
 
 
@@ -25,13 +24,12 @@ gdir = pdir / 'graphs'
 
 #=================================================================================================================#
 
-CLEAR_TEMP = lnk.config.CLEAR_TEMP
 
     
 #=================================================================================================================#
 
 if __name__ == '__main__':
-    lnk.io.check_temp(clear=CLEAR_TEMP)
+    lnk.io.check_temp(clear=lnk.config.CLEAR_TEMP)
     log.info('Analyzing dataset: %s', pdir)
     assert pdir.exists()
 
