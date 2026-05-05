@@ -49,10 +49,4 @@ def rois(rois, shape):
     rois = color.transpose(0,3,1,2)
     return rois
 
-# Draws functional map weights in a volume
-def fmap(rois, weights):
-    fmap = np.zeros(rois.shape, np.float32)
-    mask = (rois > -1)
-    fmap[mask] = weights[rois[mask]]
-    return fmap
 

@@ -127,6 +127,12 @@ def validate_rois(rois, Lc=0):
             lnk.meta.Error("Unique label count should one more than roi count, but found: (Max: %s, Min: %s, Lc: %s)", rois.max(), rois.min(), Lc, error=ValueError)
     return
 
+# Replaces ROIs in a labeled array with their corresponding weights from a list
+def weight_rois(rois, weights):
+    weighted = np.zeros(rois.shape, np.float32)
+    mask = (rois > -1)
+    weighted[mask] = weights[rois[mask]]
+    return weighted
 
 
 
