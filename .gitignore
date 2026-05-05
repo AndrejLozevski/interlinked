@@ -1,6 +1,9 @@
 # Rust
 /target
 
+# Scripts
+/scripts
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 .pytest_cache/
