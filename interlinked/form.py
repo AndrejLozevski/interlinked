@@ -1,9 +1,6 @@
 import sys
-import cv2
 import logging
 import numpy as np
-import scipy as sp
-import skimage.morphology as morph
 
 import interlinked as lnk
 
