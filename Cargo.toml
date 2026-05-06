@@ -9,7 +9,7 @@ name       = "interlinked"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3    = { version = "0.28.2", features = ["extension-module"] }
+pyo3    = { version = "0.28.2", features = ["extension-module", "abi3-py310"] }
 numpy   = "0.28.0"
 ndarray = "0.17"
 statrs  = "0.18"
