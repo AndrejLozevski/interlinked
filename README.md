@@ -8,7 +8,7 @@ This module can be installed by running:
 ```bash
 pip install interlinked-lab
 ```
-
+___
 
 ## Submodules
 All code is organized into the following submodules:
@@ -30,13 +30,14 @@ print(interlinked.config.defaults())
 from interlinked import config
 print(config.defaults())
 ```
-
+---
 
 All submodules and their functions/methods are listed below[^1]:
 [^1]: Only functions built for typical users are shown below. Additional functions not shown here are considered peripheral and should only be used after reading the source code.
 
 ### Config 
 This submodule is a class instance, possessing the following methods and attributes:
+
 `def defaults(self)`
 - **Lists all config default parameters**
 - returns: *None*
@@ -84,7 +85,7 @@ Attributes:
 
 - *RADIUS: int* --- radius used for graph theory and nearest neighbors operations
 - *MIN_SIZE: int* --- minimum node count for graph theory operations
-
+***
 
 ### Utils 
 `def digitize(x, n, dtype=np.int32)` 
@@ -94,7 +95,7 @@ Attributes:
 - *dtype: dtype* --- target dtype of output array
 - returns: *ndarray (ndim of 1)*
     
-`def dff(raw, downsample=1, percentile=20, window=300)`
+`def dff(raw, downsample=1, percentile=20, window=300)`  
 : **Calculates the ΔF/F of a calcium trace using a percentile filter and a sliding window**
 : *raw: ndarray (ndim of 1)* --- input array for which to calculate ΔF/F
 : *downsample: int* --- downsampling factor (setting to 1 prevents downsampling)
