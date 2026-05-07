@@ -162,7 +162,7 @@ def load_metadata(path):
     path = _path(path)
     Rz, Ry, Rx = load_resolution(path)
     Rt = 1 / load_fps(path)
-    return Rz, Ry, Rx, Rt
+    return Rt, Rz, Ry, Rx
 
 
 #--| Suite2p Data |---------------------------------------------------------------------#
