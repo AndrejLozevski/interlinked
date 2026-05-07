@@ -66,7 +66,7 @@ This submodule is a class instance, possessing the following methods and attribu
   returns: *None*<br>
 
 #### Attributes<br>
-- TEMP_DIR: *Path = /tmp/interlinked* --- where the temp directory is located **(DO NOT CHANGE)**<br>
+- `TEMP_DIR:` *Path = /tmp/interlinked* --- where the temp directory is located **(DO NOT CHANGE)**<br>
 - `TEMP_PREFIX:` *str = "\_\_temp\_\_"* --- file prefix given to temporary files **(DO NOT CHANGE)**
 - `TEMP_SUFFIX:` *str = ".dat"* --- file suffix given to temporary files **(DO NOT CHANGE)**
 - `CLEAR_TEMP:` *bool = False* --- *see io.check_temp() below*
@@ -78,17 +78,20 @@ This submodule is a class instance, possessing the following methods and attribu
 - `NUM_KNNS:` *int = 8* --- number of nearest neighbors for KNN operations
 - `NUM_ITER:` *int = 1_000_000* --- number of iterations for monte carlo simulation and bootstrap resampling operations
 
-- `ALPHA1:` *float = 0.05*
-  --- α₁ for statistical tests
-- `ALPHA2:` *float = 0.01*
+- `ALPHA1:` *float = 0.05*<br>
+  --- α₁ for statistical tests<br>
+- `ALPHA2:` *float = 0.01*<br>
   --- α₂ for statistical tests<br>
 - `ALPHA3:` *float = 0.001*<br>
   --- α₃ for statistical tests<br>
-- `ALPHA4:` *float = 0.0001* --- α₄ for statistical tests
-          `
-- `RADIUS:` *int* --- radius used for graph theory and nearest neighbors operations
-- `MIN_SIZE:` *int* --- minimum node count for graph theory operations
-***
+- `ALPHA4:` *float = 0.0001*<br>
+  --- α₄ for statistical tests<br>
+
+- `RADIUS:` *int*<br>
+  --- radius used for graph theory and nearest neighbors operations<br>
+- `MIN_SIZE:` *int*<br>
+  --- minimum node count for graph theory operations<br>
+---
 
 ### Utils 
 `def digitize(x, n, dtype=np.int32)`<br>
