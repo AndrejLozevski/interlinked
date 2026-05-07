@@ -112,75 +112,75 @@ This submodule is a class instance, possessing the following methods and attribu
     
 - `def dff(raw, downsample=1, percentile=20, window=300)`<br>
   **Calculates the ΔF/F of a calcium trace using a percentile filter and a sliding window**<br>
-  `raw:` *ndarray (ndim of 1)* --- input array for which to calculate ΔF/F<br>
-  `downsample:` *int* --- downsampling factor (setting to 1 prevents downsampling)<br>
-  `percentile:` *float* --- percentile with which to calculate the baseline of the time series<br>
-  `window:` *int* --- sliding window size with which to calculate the baseline of the time series<br>
+  raw: *ndarray (ndim of 1)* --- input array for which to calculate ΔF/F<br>
+  downsample: *int* --- downsampling factor (setting to 1 prevents downsampling)<br>
+  percentile: *float* --- percentile with which to calculate the baseline of the time series<br>
+  window: *int* --- sliding window size with which to calculate the baseline of the time series<br>
   returns: *ndarray (ndim of 1)*<br>
 
 - `def divisor(arr, minimum=1, default_positive=True)`<br>
   **Converts an input array into a safe divisor for array division, keeping sign and preventing unintentional mulitiplication**<br>
-  *arr: ndarray* --- input array to convert<br>
-  *minimum: float* --- minimum magnitude allowed above or below 0 (prevents multiplication)<br>
-  *default_positive: bool* --- used to set any 0 in the input array to ±minimum<br>
+  arr: *ndarray* --- input array to convert<br>
+  minimum: *float* --- minimum magnitude allowed above or below 0 (prevents multiplication)<br>
+  default_positive: *bool* --- used to set any 0 in the input array to ±minimum<br>
   returns: *ndarray*<br>
 
 
 ### IO
-`def find_file(path, pattern, allow_multiple=False)`
-- **Returns a file from a directory with a specified glob pattern**
-- *path: str | Path* --- directory to search for the target file
-- *pattern: str* --- glob pattern with which to search
-- *allow_multiple: bool* --- whether to return an error if mulple files are found with the pattern
-- returns: *Path*
+- `def find_file(path, pattern, allow_multiple=False)`<br>
+  **Returns a file from a directory with a specified glob pattern**<br>
+  path: *str | Path* --- directory to search for the target file<br>
+  pattern: *str* --- glob pattern with which to search<br>
+  allow_multiple: *bool* --- whether to return an error if mulple files are found with the pattern<br>
+  returns: *Path | list\[Path]*<br>
 
-`def load_file(path, pattern, allow_pickle=False)`
-- **Finds and loads data from a single .npy, .tif, .h5, or .hdf5 file from a directory with a specified glob pattern**
-- *path: str | Path* --- directory to search for the target file
-- *pattern: str* --- glob pattern with which to search
-- *allow_pickle: bool* --- if a .npy file is found, whether to allow pickling
-- returns: *file data (depends on file type)*
+- `def load_file(path, pattern, allow_pickle=False)`<br>
+  **Finds and loads data from a single .npy, .tif, .h5, or .hdf5 file from a directory with a specified glob pattern**<br>
+  path: *str | Path* --- directory to search for the target file<br>
+  pattern: *str* --- glob pattern with which to search<br>
+  allow_pickle: *bool* --- if a .npy file is found, whether to allow pickling<br>
+  returns: *file data (depends on file type)*<br>
 
-`def check_temp(clear=False)`
-- **Checks if there are any temporary files in your temp directory**
-- *clear: bool* --- deletes any temporary files in the temp directory
-- returns: *None*
+- `def check_temp(clear=False)`<br>
+  **Checks if there are any temporary files in your temp directory**<br>
+  clear: *bool* --- deletes any temporary files in the temp directory<br>
+  returns: *None*<br>
 
-`def clear_temp(notify=True)`
-- **Clears any temporary files in the temp directory**
-- *notify: bool* --- whether to log that files were cleared
-- returns: *None*
+- `def clear_temp(notify=True)`<br>
+  **Clears any temporary files in the temp directory**<br>
+  notify: *bool* --- whether to log that files were cleared<br>
+  returns: *None*<br>
 
-`class Memmap`
-- **Streamlines handling of numpy memmap objects**
-- `def save(self, data)`
-  - **Saves a memmap object in the temp directory**
-  - *data: ndarray* --- numpy array to save into a memmap file
-  - returns: *None*
+- `class Memmap`<br>
+  **Streamlines handling of numpy memmap objects**<br>
+  - `def save(self, data)`<br>
+    **Saves a memmap object in the temp directory**<br>
+    data: *ndarray* --- numpy array to save into a memmap file<br>
+    returns: *None*<br>
  
-- `def load(self, read_only=True)`
-  - **Loads a memmap object's data**
-  - *read_only: bool* --- whether the memmap is loaded as *'r'* or *'r+'*
-  - returns: *numpy memmap*
+  - `def load(self, read_only=True)`<br>
+    **Loads a memmap object's data**<br>
+    read_only: *bool* --- whether the memmap is loaded with read or read/write permissions<br>
+    returns: *numpy memmap*<br>
 
-- `def delete(self)`
-  - **Deletes a memmap object from the temp directory**
-  - returns: *None*
+  - `def delete(self)`<br>
+    **Deletes a memmap object from the temp directory**<br>
+    returns: *None*<br>
 
-`def load_fps(path)`
-- **Loads the fps of from an xml file found in the specified directory**
-- *path: str | Path* --- directory to search for the target file
-- returns: *float*
+- `def load_fps(path)`<br>
+  **Loads the fps of from an xml file found in the specified directory**<br>
+  path: *str | Path* --- directory to search for the target file<br>
+  returns: *float*<br>
 
-`def load_resolution(path)`
-- **Loads the (z,y,x) resolution from a txt file found in the specified directory**
-- *path: str | Path* --- directory to search for the target file
-- returns: *tuple(float, float, float)*
+- `def load_resolution(path)`<br>
+  **Loads the (z,y,x) resolution from a txt file found in the specified directory**<br>
+  path: *str | Path* --- directory to search for the target file<br>
+  returns: *tuple(float, float, float)*<br>
 
-`def load_metadata(path)`
-- **Loads the (t,z,y,x) resolution from txt and xml files found in the specified directory**
-- *path: str | Path* --- directory to search for the metadata
-- returns: *tuple(float, float, float, float)*
+- `def load_metadata(path)`<br>
+  **Loads the (t,z,y,x) resolution from txt and xml files found in the specified directory**<br>
+  path: *str | Path* --- directory to search for the metadata<br>
+  returns: *tuple(float, float, float, float)*<br>
 
 
 
