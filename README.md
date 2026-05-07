@@ -103,27 +103,27 @@ This submodule is a class instance, possessing the following methods and attribu
 ---
 
 ### Utils 
-`def digitize(x, n, dtype=np.int32)`<br>
-&emsp;**Digitizes an input array into discretized values from a given number of fixed-width bins**<br>
-&emsp;*x: ndarray (ndim of 1)* --- input array to digitize<br>
-&emsp;*n: int* --- desired range of the output array<br>
-&emsp;*dtype: dtype* --- target dtype of output array<br>
-&emsp;returns: *ndarray (ndim of 1)*<br>
+- `def digitize(x, n, dtype=np.int32)`<br>
+  **Digitizes an input array into discretized values from a given number of fixed-width bins**<br>
+  x: *ndarray (ndim of 1)* --- input array to digitize<br>
+  n: *int* --- desired range of the output array<br>
+  dtype: *dtype* --- target dtype of output array<br>
+  returns: *ndarray (ndim of 1)*<br>
     
 - `def dff(raw, downsample=1, percentile=20, window=300)`<br>
-  **Calculates the ΔF/F of a calcium trace using a percentile filter and a sliding window**  
-  *raw: ndarray (ndim of 1)* --- input array for which to calculate ΔF/F  
-  *downsample: int* --- downsampling factor (setting to 1 prevents downsampling)  
-  *percentile: float* --- percentile with which to calculate the baseline of the time series  
-  *window: int* --- sliding window size with which to calculate the baseline of the time series  
-  returns: *ndarray (ndim of 1)*  
+  **Calculates the ΔF/F of a calcium trace using a percentile filter and a sliding window**<br>
+  `raw:` *ndarray (ndim of 1)* --- input array for which to calculate ΔF/F<br>
+  `downsample:` *int* --- downsampling factor (setting to 1 prevents downsampling)<br>
+  `percentile:` *float* --- percentile with which to calculate the baseline of the time series<br>
+  `window:` *int* --- sliding window size with which to calculate the baseline of the time series<br>
+  returns: *ndarray (ndim of 1)*<br>
 
-`def divisor(arr, minimum=1, default_positive=True)`<br>
-&ensp;**Converts an input array into a safe divisor for array division, keeping sign and preventing unintentional mulitiplication**<br>
-&ensp;*arr: ndarray* --- input array to convert<br>
-&ensp;*minimum: float* --- minimum magnitude allowed above or below 0 (prevents multiplication)<br>
-&ensp;*default_positive: bool* --- used to set any 0 in the input array to ±minimum<br>
-&ensp;returns: *ndarray*<br>
+- `def divisor(arr, minimum=1, default_positive=True)`<br>
+  **Converts an input array into a safe divisor for array division, keeping sign and preventing unintentional mulitiplication**<br>
+  *arr: ndarray* --- input array to convert<br>
+  *minimum: float* --- minimum magnitude allowed above or below 0 (prevents multiplication)<br>
+  *default_positive: bool* --- used to set any 0 in the input array to ±minimum<br>
+  returns: *ndarray*<br>
 
 
 ### IO
