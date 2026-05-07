@@ -38,9 +38,9 @@ All submodules and their functions/methods are listed below[^1]:
 ### Config 
 This submodule is a class instance, possessing the following methods and attributes:
 
-`def defaults(self)`
-- **Lists all config default parameters**
-- returns: *None*
+`def defaults(self)`<br>
+**Lists all config default parameters**<br>
+returns: *None*<br>
 
 `def list(self)`
 - **Lists all current config parameters**
