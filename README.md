@@ -37,32 +37,32 @@ All submodules and their functions/methods are listed below[^1]:
 ### Config<br>
 This submodule is a class instance, possessing the following methods and attributes:
 
-`def defaults(self)`<br>
-**Lists all config default parameters**<br>
-returns: *None*<br>
+- `def defaults(self)`<br>
+  **Lists all config default parameters**<br>
+  returns: *None*<br>
 
-- `def list(self)`
-  **Lists all current config parameters**
-  returns: *None*
+- `def list(self)`<br>
+  **Lists all current config parameters**<br>
+  returns: *None*<br>
 
 - `def configure(self, \*\*kwargs)`<br>
   **Updates any specified config parameters**<br>
   *Default parameters cannot be changed to a different type, but custom parameters have no restrictions*<br>
   returns: *None*<br>
 
-`def reset(self)`
-- **Resets config parameters to defaults**
-- returns: *None*
+- **def reset(self)**<br>
+  Resets config parameters to defaults<br>
+  returns: *None*<br>
 
-`def save(self)`
-- **Saves current config parameters in the temp directory**
-- *Overwrites any pre-existing saved config parameters*
-- returns: *None*
+- def save(self)<br>
+  **Saves current config parameters in the temp directory**<br>
+  *Overwrites any pre-existing saved config parameters*<br>
+  returns: *None*<br>
 
-`def load(self)`
-- **Loads config parameters saved in the temp directory**
-- *If no saved parameters are found, throws an Exception and loads defaults*
-- returns: *None*
+- `def load(self)`<br>
+  **Loads config parameters saved in the temp directory**<br>
+  *If no saved parameters are found, throws an Exception and loads defaults*<br>
+  returns: *None*<br>
 
 Attributes:
 - *TEMP_DIR: Path = /tmp/interlinked* --- where the temp directory is located **(DO NOT CHANGE)**
