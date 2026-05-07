@@ -88,12 +88,12 @@ Attributes:
 ***
 
 ### Utils 
-`def digitize(x, n, dtype=np.int32)` 
-&emsp;**Digitizes an input array into discretized values from a given number of fixed-width bins**
-&emsp;*x: ndarray (ndim of 1)* --- input array to digitize
-&emsp;*n: int* --- desired range of the output array
-&emsp;*dtype: dtype* --- target dtype of output array
-&emsp;returns: *ndarray (ndim of 1)*
+- `def digitize(x, n, dtype=np.int32)`
+  &emsp;**Digitizes an input array into discretized values from a given number of fixed-width bins**
+  &emsp;*x: ndarray (ndim of 1)* --- input array to digitize
+  &emsp;*n: int* --- desired range of the output array
+  &emsp;*dtype: dtype* --- target dtype of output array
+  &emsp;returns: *ndarray (ndim of 1)*
     
 <pre>
 - `def dff(raw, downsample=1, percentile=20, window=300)`  
@@ -105,12 +105,12 @@ Attributes:
   returns: *ndarray (ndim of 1)*  
 </pre>
 
-`def divisor(arr, minimum=1, default_positive=True)`
-&ensp;**Converts an input array into a safe divisor for array division, keeping sign and preventing unintentional mulitiplication**
-&ensp;*arr: ndarray* --- input array to convert
-&ensp;*minimum: float* --- minimum magnitude allowed above or below 0 (prevents multiplication)
-&ensp;*default_positive: bool* --- used to set any 0 in the input array to ±minimum
-&ensp;returns: *ndarray*
+- `def divisor(arr, minimum=1, default_positive=True)`
+  &ensp;**Converts an input array into a safe divisor for array division, keeping sign and preventing unintentional mulitiplication**
+  &ensp;*arr: ndarray* --- input array to convert
+  &ensp;*minimum: float* --- minimum magnitude allowed above or below 0 (prevents multiplication)
+  &ensp;*default_positive: bool* --- used to set any 0 in the input array to ±minimum
+  &ensp;returns: *ndarray*
 
 
 ### IO
