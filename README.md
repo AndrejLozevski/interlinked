@@ -218,13 +218,62 @@ This submodule is a class instance, possessing the following methods and attribu
   - *tuple(int, int, int, int, int)* --- data shape (Lr,Lc,Lt,Lz,Ly,Lx)<br>
 
 - `def build_trials(drift)`<br>
-  **Builds a trials-by-timepoints array of timepoint indices**<br>
+  **Builds a trials-by-timepoints (Ln,Ltt) array of timepoint indices**<br>
   drift: *ndarray (ndim of 1)* --- drift time series, used to distinguish trials<br>
   min_length: *int* --- length cutoff to distinguish go period from pulses<br>
-  returns: *ndarray (ndim of 2)* --- trial time indices array (Ln,Ltt)
+  returns: *ndarray (ndim of 2)*
 ---
 
-### Form
+### Form<br>
+- `def form_volume(img, shape)`<br>
+  **Forms a volumetric array from a tiled image, using the specified target shape**<br>
+  img: *ndarray (ndim of 2)* --- original tiled image<br>
+  shape: *tuple(int, int, int)* --- shape of target volume (z,y,x)<br>
+  returns: *ndarray (ndim of 3)*<br>
+
+- `def form_tiles(vol, shape)`<br>
+  **Forms a tiled image from a volume, using the specified target shape**<br>
+  vol: *ndarray (ndim of 3)* --- original volume<br>
+  shape: *tuple(int, int)* --- shape of target tiled image<br>
+  returns: *ndarray (ndim of 2)*<br>
+
+- `def label_rois(stat, shape)`<br>
+  **Labels all ROIs in a volume using a stat.npy file**<br>
+  stat: *list\[dict]* --- list of pickled and sparse-labeled cells<br>
+  shape: *tuple(int, int, int)* --- shape of the target volume<br>
+  returns: *ndarray (ndim of 3)*<br>
+
+- `def adjust_rois(arr)`<br>
+  **Removes missing labels in a labeled array by shifting ROIs**<br>
+  arr: *ndarray* --- labeled array<br>
+  returns:<br>
+  - *ndarray* --- relabled array<br>
+  - *ndarray (ndim of 1)* --- array of indices of the original unique labels<br>
+  - *list\[int]* --- list of missing indices from the original array<br>
+
+- `def remove_rois(arr, rois, keep=False)`<br>
+  **Removes the specified labels from a labeled array, leaving missing labels**<br>
+  arr: *ndarray* --- labeled array<br>
+  rois: *list\[int] | ndarray (ndim of 1)* --- selected labels<br>
+  keep: *bool* --- if True, remove whatever rois are not selected, and if False, remove whatever rois are selected<br>
+  returns: *ndarray*<br>
+
+- `def weight_rois(rois, weights)`
+  **Substitutes a labeled array with each label's corresponding weight**<br>
+  rois: *ndarray* --- labeled array<br>
+  weights: *list\[float] | ndarray (ndim of 1)* --- weights corresponding to each label<br>
+  returns: *ndarray*<br>
+
+
+
+
+
+
+
+
+
+
+
 
 
 ## License
