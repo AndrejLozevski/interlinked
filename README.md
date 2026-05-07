@@ -10,20 +10,13 @@ pip install interlinked-lab
 
 ## Submodules
 All code is organized into the following submodules:
-- utils
-  - Contains functions for a wide range of uses
-- io
-  > Contains functions for I/O operations and streamlined file use
-> form
-  - Contains functions for manipulating labeled and non-labeled arrays
-> stats
-  > Contains functions for statistical tests and measures
-- info
-    Contains functions for information theoretic tests and measures
-- draw
-    Contains functions for data visualization
-- config
-    Contains methods for updating, resetting, loading, and saving parameter settings for the module's default behaviors and arguments
+- **utils** --- Contains functions for a wide range of uses
+- **io** --- Contains functions for I/O operations and streamlined file use
+- **form** --- Contains functions for manipulating labeled and non-labeled arrays
+- **stats** --- Contains functions for statistical tests and measures
+- **info** --- Contains functions for information theoretic tests and measures
+- **draw** --- Contains functions for data visualization
+- **config** --- Contains methods for updating, resetting, loading, and saving parameter settings for the module's default behaviors and arguments
 
 Each submodule can be used in a program directly or through imports:
 ```python
@@ -36,21 +29,21 @@ from interlinked import config
 print(config.defaults())
 ```
 
-All submodules and their functions/methods are listed below[^*]:
-[^*]: Only functions built for typical users are shown below. Additional functions not shown here are considered peripheral and should only be used after reading the source code.
+All submodules and their functions/methods are listed below[^1]:
+[^1]: Only functions built for typical users are shown below. Additional functions not shown here are considered peripheral and should only be used after reading the source code.
 ### Utils 
-- `def digitize(x, n, dtype=np.int32)` 
-  - **Digitizes an input array into discretized values from a given number of fixed-width bins**
-    - *x: ndarray (ndim of 1)* --- input array to digitize
-    - *n: int* --- desired range of the output array
-    - *dtype: dtype* --- target dtype of output array
+`def digitize(x, n, dtype=np.int32)` 
+- **Digitizes an input array into discretized values from a given number of fixed-width bins**
+- - *x: ndarray (ndim of 1)* --- input array to digitize
+- - *n: int* --- desired range of the output array
+- - *dtype: dtype* --- target dtype of output array
     
 - `def dff(raw, downsample=1, percentile=20, window=300)`
-  > **Calculates the ΔF/F of a calcium trace using a percentile filter and a sliding window**
-  > *raw: ndarray (ndim of 1)* --- input array for which to calculate ΔF/F
-  > *downsample: int* --- downsampling factor (setting to 1 prevents downsampling)
-  > *percentile: float* --- percentile with which to calculate the baseline of the time series
-  > *window: int* --- sliding window size with which to calculate the baseline of the time series
+- - **Calculates the ΔF/F of a calcium trace using a percentile filter and a sliding window**
+- - *raw: ndarray (ndim of 1)* --- input array for which to calculate ΔF/F
+- - *downsample: int* --- downsampling factor (setting to 1 prevents downsampling)
+- - *percentile: float* --- percentile with which to calculate the baseline of the time series
+- - *window: int* --- sliding window size with which to calculate the baseline of the time series
 
 `def divisor(arr, minimum=1, default_positive=True)`
   > **Converts an input array into a safe divisor for array division, keeping sign and preventing unintentional mulitiplication**
