@@ -37,6 +37,7 @@ All submodules and their functions/methods are listed below[^1]:
 ### Config<br>
 This submodule is a class instance, possessing the following methods and attributes:
 
+#### Methods<br>
 - `def defaults(self)`<br>
   **Lists all config default parameters**<br>
   returns: *None*<br>
@@ -45,16 +46,16 @@ This submodule is a class instance, possessing the following methods and attribu
   **Lists all current config parameters**<br>
   returns: *None*<br>
 
-- `def configure(self, \*\*kwargs)`<br>
+- `def configure(self, **kwargs)`<br>
   **Updates any specified config parameters**<br>
   *Default parameters cannot be changed to a different type, but custom parameters have no restrictions*<br>
   returns: *None*<br>
 
-- **def reset(self)**<br>
-  Resets config parameters to defaults<br>
+- `def reset(self)`<br>
+  **Resets config parameters to defaults**<br>
   returns: *None*<br>
 
-- def save(self)<br>
+- `def save(self)`<br>
   **Saves current config parameters in the temp directory**<br>
   *Overwrites any pre-existing saved config parameters*<br>
   returns: *None*<br>
@@ -64,26 +65,26 @@ This submodule is a class instance, possessing the following methods and attribu
   *If no saved parameters are found, throws an Exception and loads defaults*<br>
   returns: *None*<br>
 
-Attributes:
-- *TEMP_DIR: Path = /tmp/interlinked* --- where the temp directory is located **(DO NOT CHANGE)**
-- *TEMP_PREFIX: str = "\_\_temp\_\_"* --- file prefix given to temporary files **(DO NOT CHANGE)**
-- *TEMP_SUFFIX: str = ".dat"* --- file suffix given to temporary files **(DO NOT CHANGE)**
-- *CLEAR_TEMP: bool = False* --- *see io.check_temp() below*
+#### Attributes<br>
+- TEMP_DIR: *Path = /tmp/interlinked* --- where the temp directory is located **(DO NOT CHANGE)**
+- `TEMP_PREFIX`: *str = "\_\_temp\_\_"* --- file prefix given to temporary files **(DO NOT CHANGE)**
+- `TEMP_SUFFIX:` *str = ".dat"* --- file suffix given to temporary files **(DO NOT CHANGE)**
+- CLEAR_TEMP: *bool = False* --- *see io.check_temp() below*
 
-- *BATCH_SIZE: int = 1000* --- size of batches for parallelism
-- *NUM_WORKERS: int = 8* --- number of workers for parallelism
+- BATCH_SIZE: *int = 1000* --- size of batches for parallelism
+- NUM_WORKERS: *int = 8* --- number of workers for parallelism
 
-- *NUM_BINS: int = 5* --- number of bins for binning and digitization
-- *NUM_KNNS: int = 8* --- number of nearest neighbors for KNN operations
-- *NUM_ITER: int = 1_000_000* --- number of iterations for monte carlo simulation and bootstrap resampling operations
+- NUM_BINS: *int = 5* --- number of bins for binning and digitization
+- NUM_KNNS: *int = 8* --- number of nearest neighbors for KNN operations
+- NUM_ITER: *int = 1_000_000* --- number of iterations for monte carlo simulation and bootstrap resampling operations
 
-- *ALPHA1: float = 0.05* --- α₁ for statistical tests
-- *ALPHA2: float = 0.01* --- α₂ for statistical tests
-- *ALPHA3: float = 0.001* --- α₃ for statistical tests
-- *ALPHA4: float = 0.0001* --- α₄ for statistical tests
+- ALPHA1: *float = 0.05* --- α₁ for statistical tests
+- ALPHA2: *float = 0.01* --- α₂ for statistical tests
+- ALPHA3: *float = 0.001* --- α₃ for statistical tests
+- ALPHA4: *float = 0.0001* --- α₄ for statistical tests
 
-- *RADIUS: int* --- radius used for graph theory and nearest neighbors operations
-- *MIN_SIZE: int* --- minimum node count for graph theory operations
+- RADIUS: *int* --- radius used for graph theory and nearest neighbors operations
+- MIN_SIZE: *int* --- minimum node count for graph theory operations
 ***
 
 ### Utils 
