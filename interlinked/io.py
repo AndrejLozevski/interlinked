@@ -168,7 +168,7 @@ def load_metadata(path):
 #--| Suite2p Data |---------------------------------------------------------------------#
 
 # Ensures that the provided path is the Suite2p combined directory
-def ensure_suite2p_path(path):
+def _ensure_suite2p_path(path):
     path = _path(path)
     if (path / "suite2p").exists():
         path = path / "suite2p"
@@ -184,7 +184,7 @@ def ensure_suite2p_path(path):
     return path
 
 # Aligns ROIs into a volume from a Suite2p combined stat.npy file
-def align_rois(cell_locations, shape):
+def _load_rois(cell_locations, shape):
     Lc, Lt, Lz, Ly, Lx = shape
     cell_id = 0
     rois = -1 * np.ones((Lz, Ly, Lx), dtype=np.int64)
@@ -200,7 +200,7 @@ def align_rois(cell_locations, shape):
     return rois
 
 # Loads brainmap as a volume from ops.npy file
-def load_brainmap(ops, shape):
+def _load_brainmap(ops, shape):
     Lc, Lt, Lz, Ly, Lx = shape
     mean = ops["meanImg"].astype(np.float32)
     bmap = lnk.form_volume(mean, (Lz, Ly, Lx))
@@ -221,7 +221,7 @@ def load_brainmap(ops, shape):
 
 # Loads Suite2p data from the given path
 def load_suite2p_data(path):
-    path = ensure_suite2p_path(path)
+    path = _ensure_suite2p_path(path)
     cell_locations = np.load(path / "stat.npy", allow_pickle=True)
     cell_traces    = np.load(path / "F.npy",    allow_pickle=True)
     ops            = np.load(path / "ops.npy",  allow_pickle=True).item()
@@ -238,15 +238,15 @@ def load_suite2p_data(path):
         ops["lenX"]              # Lx, length X
     )
 
-    bmap = load_brainmap(ops, shape)
-    rois = align_rois(cell_locations, shape)
-    return roise, cell_traces, bmap, shape, ops
+    bmap = _load_brainmap(ops, shape)
+    rois = _load_rois(cell_locations, shape)
+    return rois, cell_traces, bmap, shape, ops
 
 
 #--| VoluSeg Data |---------------------------------------------------------------------#
 
 # Ensures that the provided path is the VoluSeg directory
-def ensure_voluseg_path(path):
+def _ensure_voluseg_path(path):
     path = _path(path)
     if (path / "voluseg").exists():
         path = path / "voluseg"
@@ -261,7 +261,7 @@ def ensure_voluseg_path(path):
 
 # Loads VoluSeg data from the given path
 def load_voluseg_data(path):
-    path = ensure_voluseg_path(path)
+    path = _ensure_voluseg_path(path)
 
     volume_data = h5py.File(path / "volume0.hdf5",      "r")
     cell_data   = h5py.File(path / "cells0_clean.hdf5", "r")
@@ -288,7 +288,7 @@ def load_voluseg_data(path):
 #--| Combined Data |---------------------------------------------------------------------#
 
 # Ensures that the provided path is the Suite2p combined directory
-def ensure_combined_path(path):
+def _ensure_combined_path(path):
     path = _path(path)
     needed_files = ["combined_segdata.h5"]
     for file in needed_files:
@@ -298,7 +298,7 @@ def ensure_combined_path(path):
 
 # Loads VoluSeg data from the given path
 def load_combined_data(path, metadata=False):
-    path = ensure_combined_path(path)
+    path = _ensure_combined_path(path)
 
     with h5py.File(path / "combined_segdata.h5", "r") as file:
         rois = file["rois"][:]
@@ -314,9 +314,9 @@ def load_combined_data(path, metadata=False):
 #--| Trials |---------------------------------------------------------------------------#
 
 # Creates a (trial, time) array of time indices for masking
-def build_trials(drift):
+def build_trials(drift, min_length=10):
     mask_drift = (drift != 0)
-    mask_move  = morph.remove_small_objects(mask_drift, min_size=10)
+    mask_move  = morph.remove_small_objects(mask_drift, min_size=min_length)
     mask_wait  = ~mask_move
     mask_pulse = mask_wait & mask_drift
 

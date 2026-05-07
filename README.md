@@ -124,7 +124,7 @@ This submodule is a class instance, possessing the following methods and attribu
   minimum: *float* --- minimum magnitude allowed above or below 0 (prevents multiplication)<br>
   default_positive: *bool* --- used to set any 0 in the input array to ±minimum<br>
   returns: *ndarray*<br>
-
+---
 
 ### IO
 - `def find_file(path, pattern, allow_multiple=False)`<br>
@@ -151,8 +151,11 @@ This submodule is a class instance, possessing the following methods and attribu
   notify: *bool* --- whether to log that files were cleared<br>
   returns: *None*<br>
 
-- `class Memmap`<br>
-  **Streamlines handling of numpy memmap objects**<br>
+- `class Memmap(shape, dtype)`<br>
+  **Streamlines handling of numpy memmap objects in the temp directory**<br>
+  shape: *tuple()* --- shape of the stored array<br>
+  dtype: *dtype* --- dtype of the stored array<br>
+
   - `def save(self, data)`<br>
     **Saves a memmap object in the temp directory**<br>
     data: *ndarray* --- numpy array to save into a memmap file<br>
@@ -161,7 +164,7 @@ This submodule is a class instance, possessing the following methods and attribu
   - `def load(self, read_only=True)`<br>
     **Loads a memmap object's data**<br>
     read_only: *bool* --- whether the memmap is loaded with read or read/write permissions<br>
-    returns: *numpy memmap*<br>
+    returns: *numpy.Memmap*<br>
 
   - `def delete(self)`<br>
     **Deletes a memmap object from the temp directory**<br>
@@ -182,9 +185,46 @@ This submodule is a class instance, possessing the following methods and attribu
   path: *str | Path* --- directory to search for the metadata<br>
   returns: *tuple(float, float, float, float)*<br>
 
+- `def load_suite2p_data(path)`<br>
+  **Loads the labeled volume of all ROIs, cell activity traces, time-averaged brainmap, data shape, and ops from a Suite2p-containing directory**<br>
+  *Requires the existence of stat.npy, F.npy, and ops.npy files*<br>
+  path: *str | Path* --- directory containing Suite2p files<br>
+  returns:<br> 
+  - *ndarray (ndim of 3)* --- labeled volume (z,y,x)<br>
+  - *ndarray (ndim of 2)* --- cell traces (c,t)<br>
+  - *ndarray (ndim of 3)* --- brainmap (z,y,x)<br>
+  - *tuple(int, int, int, int, int)* --- data shape (Lc,Lt,Lz,Ly,Lx)<br>
+  - *Suite2p Ops*<br>
 
+- `def load_voluseg_data(path)`<br>
+  **Loads the labeled volume of all ROIs, cell activity traces, time-averaged brainmap, and data shape VoluSeg-containing directory**<br>
+  *Requires the existence of volume0.hdf5 and cells0_clean.hdf5 files*<br>
+  path: *str | Path* --- directory containing VoluSeg files<br>
+  returns:<br> 
+  - *ndarray (ndim of 3)* --- labeled volume (z,y,x)<br>
+  - *ndarray (ndim of 2)* --- cell traces (c,t)<br>
+  - *ndarray (ndim of 3)* --- brainmap (z,y,x)<br>
+  - *tuple(int, int, int, int, int)* --- data shape (Lc,Lt,Lz,Ly,Lx)<br>
 
+- `def load_combined_data(path)`<br>
+  **Loads the labeled volume of all ROIs, ROI activity traces, time-averaged brainmap, and data shape Combined-Segmentation-containing directory**<br>
+  *Requires the existence of a combined_segdata.h5 file*<br>
+  *Last Lc rows in ROI traces are Suite2p-identified cells. First (Lr - Lc) rows are VoluSeg-identified ROIs*<br>
+  path: *str | Path* --- directory containing combined file<br>
+  returns:<br> 
+  - *ndarray (ndim of 3)* --- labeled volume (z,y,x)<br>
+  - *ndarray (ndim of 2)* --- ROI traces (r,t)<br>
+  - *ndarray (ndim of 3)* --- brainmap (z,y,x)<br>
+  - *tuple(int, int, int, int, int)* --- data shape (Lr,Lc,Lt,Lz,Ly,Lx)<br>
 
+- `def build_trials(drift)`<br>
+  **Builds a trials-by-timepoints array of timepoint indices**<br>
+  drift: *ndarray (ndim of 1)* --- drift time series, used to distinguish trials<br>
+  min_length: *int* --- length cutoff to distinguish go period from pulses<br>
+  returns: *ndarray (ndim of 2)* --- trial time indices array (Ln,Ltt)
+---
+
+### Form
 
 
 ## License
