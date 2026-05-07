@@ -35,13 +35,13 @@ class Defaults:
     # Info parameters
     NUM_BINS: int = 5
     NUM_KNNS: int = 8
+    NUM_ITER: int = 1_000_000
 
     # Stats parameters
-    ALPHA1:          float = 0.05
-    ALPHA2:          float = 0.01
-    ALPHA3:          float = 0.001
-    ALPHA4:          float = 0.0001
-    NUM_MONTE_CARLO: int   = 1_000_000
+    ALPHA1: float = 0.05
+    ALPHA2: float = 0.01
+    ALPHA3: float = 0.001
+    ALPHA4: float = 0.0001
 
     # Graph parameters
     RADIUS:     int  = 10
