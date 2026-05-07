@@ -30,38 +30,37 @@ def _path(path, new=False):
         path = Path(path)
     if (not new) and (not path.exists()):
         lnk.meta.Error("Path '%s' does not exist", path, error=FileNotFoundError)
-        sys.exit(1)
     return path
 
 # finds a file
-def find_file(path, pattern):
+def find_file(path, pattern, allow_multiple=False):
     path = _path(path)
 
     files = list(path.glob(pattern))
     if len(files) == 0:
         lnk.meta.Error("No '%s' file found in '%s'", pattern, path, error=FileNotFoundError)
-        sys.exit(1)
     if len(files) > 1:
+        if multiple:
+            return files
         lnk.meta.Error("Found %s file(s) with the pattern '%s' in '%s'", len(files), pattern, path)
-        sys.exit(1)
 
     file = files[0]
     return file
 
 # Loads a file
-def load_file(path, pattern, pickled=False):
+def load_file(path, pattern, allow_pickle=False):
     path = _path(path)
-    file = find_file(path, pattern)
+    file = find_file(path, pattern, False)
 
-    if file.suffix == ".npy":
-        data = np.load(file, allow_pickle=pickled)
-    elif file.suffix == ".tif":
-        data = tiff.imread(file)
-    elif file.suffix in [".h5", ".hdf5"]:
-        data = h5py.File(file, "r")
-    else:
-        lnk.meta.Error("Unrecognized file extension: '%s'", file.suffix)
-        sys.exit(1)
+    for f in file:
+        if file.suffix == ".npy":
+            data = np.load(file, allow_pickle=allow_pickle)
+        elif file.suffix == ".tif":
+            data = tiff.imread(file)
+        elif file.suffix in [".h5", ".hdf5"]:
+            data = h5py.File(file, "r")
+        else:
+            lnk.meta.Error("Unrecognized file extension: '%s'", file.suffix)
     return data
 
 # Creates temporary filename (for memmap files)
@@ -79,13 +78,10 @@ def safely_delete(path):
 
     if not path.parent == temp_dir:
         lnk.meta.Error("File directory '%s' doesn\'t match the /temp directory '%s'", path.parent, temp_dir)
-        sys.exit(1)
     elif not str(path.name).startswith(prefix):
         lnk.meta.Error("File name '%s' doesn\'t start with the expected prefix '%s'", path.parent, temp_dir)
-        sys.exit(1)
     elif not path.suffix == suffix:
         lnk.meta.Error("File extension '%s' doesn\'t match the expected suffix '%s'", path.suffix, suffix)
-        sys.exit(1)
     else:
         os.remove(path)
     return
@@ -93,7 +89,7 @@ def safely_delete(path):
 # Checks for leftover temporary files
 def check_temp(clear=False):
     files = list(lnk.config.TEMP_DIR.iterdir())
-    if len(files) > 0:
+    if len(files) > 0 and "config.pkl" not in files:
         if clear:
             clear_temp(False)
             log.warning("Found and deleted %s temporary file(s) in temp directory.", len(files))
@@ -159,7 +155,6 @@ def load_resolution(path):
             return float(Rz), Ry, Rx
     else:
         lnk.meta.Error("No 'z_step' tag found in '%s'", file.name, error=KeyError)
-        sys.exit(1)
     return
 
 # Loads metadata form parent directory
@@ -181,13 +176,11 @@ def ensure_suite2p_path(path):
         path = path / "combined"
     if path.name != "combined":
         lnk.meta.Error("No suite2p combined directory found at %s", path, error=FileNotFoundError)
-        sys.exit(1)
 
     needed_files = ["stat.npy", "F.npy", "ops.npy"]
     for file in needed_files:
         if path / file not in list(path.iterdir()):
             lnk.meta.Error("file '%s' not found in %s", file, path, error=FileNotFoundError)
-            sys.exit(1)
     return path
 
 # Aligns ROIs into a volume from a Suite2p combined stat.npy file
@@ -259,13 +252,11 @@ def ensure_voluseg_path(path):
         path = path / "voluseg"
     if path.name != "voluseg":
         lnk.meta.Error("No voluseg directory found at %s", path, error=FileNotFoundError)
-        sys.exit(1)
 
     needed_files = ["cells0_clean.hdf5", "volume0.hdf5"]
     for file in needed_files:
         if path / file not in list(path.iterdir()):
             lnk.meta.Error("File '%s' not found in %s", file, path, error=FileNotFoundError)
-            sys.exit(1)
     return path
 
 # Loads VoluSeg data from the given path
@@ -303,7 +294,6 @@ def ensure_combined_path(path):
     for file in needed_files:
         if path / file not in list(path.iterdir()):
             lnk.meta.Error("File '%s' not found in %s", file, path, error=FileNotFoundError)
-            sys.exit(1)
     return path
 
 # Loads VoluSeg data from the given path
