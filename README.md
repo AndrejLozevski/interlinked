@@ -66,25 +66,28 @@ This submodule is a class instance, possessing the following methods and attribu
   returns: *None*<br>
 
 #### Attributes<br>
-- TEMP_DIR: *Path = /tmp/interlinked* --- where the temp directory is located **(DO NOT CHANGE)**
-- `TEMP_PREFIX`: *str = "\_\_temp\_\_"* --- file prefix given to temporary files **(DO NOT CHANGE)**
+- TEMP_DIR: *Path = /tmp/interlinked* --- where the temp directory is located **(DO NOT CHANGE)**<br>
+- `TEMP_PREFIX:` *str = "\_\_temp\_\_"* --- file prefix given to temporary files **(DO NOT CHANGE)**
 - `TEMP_SUFFIX:` *str = ".dat"* --- file suffix given to temporary files **(DO NOT CHANGE)**
-- CLEAR_TEMP: *bool = False* --- *see io.check_temp() below*
+- `CLEAR_TEMP:` *bool = False* --- *see io.check_temp() below*
 
-- BATCH_SIZE: *int = 1000* --- size of batches for parallelism
-- NUM_WORKERS: *int = 8* --- number of workers for parallelism
+- `BATCH_SIZE:` *int = 1000* --- size of batches for parallelism
+- `NUM_WORKERS:` *int = 8* --- number of workers for parallelism
 
-- NUM_BINS: *int = 5* --- number of bins for binning and digitization
-- NUM_KNNS: *int = 8* --- number of nearest neighbors for KNN operations
-- NUM_ITER: *int = 1_000_000* --- number of iterations for monte carlo simulation and bootstrap resampling operations
+- `NUM_BINS:` *int = 5* --- number of bins for binning and digitization
+- `NUM_KNNS:` *int = 8* --- number of nearest neighbors for KNN operations
+- `NUM_ITER:` *int = 1_000_000* --- number of iterations for monte carlo simulation and bootstrap resampling operations
 
-- ALPHA1: *float = 0.05* --- α₁ for statistical tests
-- ALPHA2: *float = 0.01* --- α₂ for statistical tests
-- ALPHA3: *float = 0.001* --- α₃ for statistical tests
-- ALPHA4: *float = 0.0001* --- α₄ for statistical tests
-
-- RADIUS: *int* --- radius used for graph theory and nearest neighbors operations
-- MIN_SIZE: *int* --- minimum node count for graph theory operations
+- `ALPHA1:` *float = 0.05*
+  --- α₁ for statistical tests
+- `ALPHA2:` *float = 0.01*
+  --- α₂ for statistical tests<br>
+- `ALPHA3:` *float = 0.001*<br>
+  --- α₃ for statistical tests<br>
+- `ALPHA4:` *float = 0.0001* --- α₄ for statistical tests
+          `
+- `RADIUS:` *int* --- radius used for graph theory and nearest neighbors operations
+- `MIN_SIZE:` *int* --- minimum node count for graph theory operations
 ***
 
 ### Utils 
