@@ -96,12 +96,12 @@ Attributes:
 - returns: *ndarray (ndim of 1)*
     
 `def dff(raw, downsample=1, percentile=20, window=300)`  
-: **Calculates the ΔF/F of a calcium trace using a percentile filter and a sliding window**
-: *raw: ndarray (ndim of 1)* --- input array for which to calculate ΔF/F
-: *downsample: int* --- downsampling factor (setting to 1 prevents downsampling)
-: *percentile: float* --- percentile with which to calculate the baseline of the time series
-: *window: int* --- sliding window size with which to calculate the baseline of the time series
-: returns: *ndarray (ndim of 1)*
+  **Calculates the ΔF/F of a calcium trace using a percentile filter and a sliding window**  
+  *raw: ndarray (ndim of 1)* --- input array for which to calculate ΔF/F  
+  *downsample: int* --- downsampling factor (setting to 1 prevents downsampling)  
+  *percentile: float* --- percentile with which to calculate the baseline of the time series  
+  *window: int* --- sliding window size with which to calculate the baseline of the time series  
+  returns: *ndarray (ndim of 1)*  
 
 `def divisor(arr, minimum=1, default_positive=True)`
 - **Converts an input array into a safe divisor for array division, keeping sign and preventing unintentional mulitiplication**
