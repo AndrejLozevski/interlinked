@@ -8,7 +8,6 @@ This module can be installed by running:
 ```bash
 pip install interlinked-lab
 ```
-___
 
 ## Submodules
 All code is organized into the following submodules:
@@ -30,26 +29,26 @@ print(interlinked.config.defaults())
 from interlinked import config
 print(config.defaults())
 ```
----
 
 All submodules and their functions/methods are listed below[^1]:
 [^1]: Only functions built for typical users are shown below. Additional functions not shown here are considered peripheral and should only be used after reading the source code.
+---
 
-### Config 
+### Config<br>
 This submodule is a class instance, possessing the following methods and attributes:
 
 `def defaults(self)`<br>
 **Lists all config default parameters**<br>
 returns: *None*<br>
 
-`def list(self)`
-- **Lists all current config parameters**
-- returns: *None*
+- `def list(self)`
+  **Lists all current config parameters**
+  returns: *None*
 
-`def configure(self, \*\*kwargs)`
-- **Updates any specified config parameters**
-- *Default parameters cannot be changed to a different type, but custom parameters have no restrictions*
-- returns: *None*
+- `def configure(self, \*\*kwargs)`<br>
+  **Updates any specified config parameters**<br>
+  *Default parameters cannot be changed to a different type, but custom parameters have no restrictions*<br>
+  returns: *None*<br>
 
 `def reset(self)`
 - **Resets config parameters to defaults**
