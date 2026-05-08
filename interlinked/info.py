@@ -80,7 +80,7 @@ def disc_MI(x, y, normalized=False, n_bins=NUM_BINS, bin_type=BIN_TYPE):
     return MI
 
 # Calculates Conditional Mutual Information between two discrete variables
-def discrete_cMI(x, y, z, normalized=False, n_bins=NUM_BINS, bin_type=BIN_TYPE):
+def discrete_CMI(x, y, z, normalized=False, n_bins=NUM_BINS, bin_type=BIN_TYPE):
     n_bins = _bins(n_bins, 3, x, y, z)
     data = np.column_stack((x, y, z))
 
@@ -115,7 +115,7 @@ def discrete_cMI(x, y, z, normalized=False, n_bins=NUM_BINS, bin_type=BIN_TYPE):
     return cMI
 
 # Calculates Interaction Information between three discrete variables
-def discrete_iMI(x, y, z, normalized=False, n_bins=NUM_BINS, bin_type=BIN_TYPE):
+def discrete_II(x, y, z, normalized=False, n_bins=NUM_BINS, bin_type=BIN_TYPE):
     n_bins = _bins(n_bins, 3, x, y, z)
     data = np.column_stack((x, y, z))
 
@@ -169,7 +169,7 @@ def KSG_CMI(x, y, z, k=NUM_KNNS, normalize=True):
     return rs_info.ksg_cmi(x, y, z, k, normalize)
 
 # Calculates interaction information of three continous variables using Kraksov-Stogbauer-Grassberger estimator
-def KSG_CMI(x, y, z, k=NUM_KNNS, normalize=True): 
+def KSG_II(x, y, z, k=NUM_KNNS, normalize=True): 
     x = np.asarray(x, dtype=np.float64)
     y = np.asarray(y, dtype=np.float64)
     z = np.asarray(z, dtype=np.float64)

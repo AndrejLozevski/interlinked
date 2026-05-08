@@ -100,6 +100,8 @@ This submodule is a class instance, possessing the following methods and attribu
   radius used for graph theory and nearest neighbors operations<br>
 - `MIN_SIZE:` *int*<br>
   minimum node count for graph theory operations<br>
+
+Any ALL-CAPS variable listed below can be assumed as a parameter found in the default config instance.
 ---
 
 ### Utils 
@@ -258,23 +260,108 @@ This submodule is a class instance, possessing the following methods and attribu
   keep: *bool* --- if True, remove whatever rois are not selected, and if False, remove whatever rois are selected<br>
   returns: *ndarray*<br>
 
-- `def weight_rois(rois, weights)`
+- `def weight_rois(rois, weights)`<br>
   **Substitutes a labeled array with each label's corresponding weight**<br>
   rois: *ndarray* --- labeled array<br>
   weights: *list\[float] | ndarray (ndim of 1)* --- weights corresponding to each label<br>
   returns: *ndarray*<br>
+---
 
+### Stats<br>
+- `def pearson_corr(x, y)`<br>
+  **Calculates the Pearson Correlation and its p-value for two variables**<br>
+  x: *ndarray (ndim of 1)*<br>
+  y: *ndarray (ndim of 1)*<br>
+  returns: *tuple(float, float)* --- ρ and p-value<br>
 
+- `def spearman_corr(x, y)`<br>
+  **Calculates the Spearman Rank Correlation and its p-value for two variables**<br>
+  x: *ndarray (ndim of 1)*<br>
+  y: *ndarray (ndim of 1)*<br>
+  returns: *tuple(float, float)* --- ρ and p-value<br>
 
+- `def phi_coef(x, y)`<br>
+  **Calculates the Phi Coefficient and its p-value for two binary variables**<br>
+  x: *ndarray (ndim of 1, bool)*<br>
+  y: *ndarray (ndim of 1, bool)*<br>
+  returns: *tuple(float, float)* --- φ and p-value<br>
 
+- `def quantile_bins(x, n_bins=NUM_BINS)`<br>
+  **Calculates the bin edges for a specified number of quantile bins**<br>
+  x: *ndarray*<br>
+  n_bins: *int*<br>
+  returns: *ndarray (ndim of 1)*<br>
+---
 
+### Info<br>
+- `def hist_H(x)`<br>
+  **Calculates the Shannon Entropy of a binned variable from a list of bin counts**<br>
+  x: *ndarray (ndim of 1)*<br>
+  returns: *float*<br>
 
+- `def KL_H(x, k)`<br>
+  **Calculates the Shannon Entropy of a continuous variable using the Kozachenko-Leonenko estimator**<br>
+  x: *ndarray (ndim of 1)* --- input array<br>
+  k: *int* --- number of nearest neighbors<br>
+  returns: *float*<br>
 
+- `def disc_MI(x, y, normalized=False, n_bins=NUM_BINS, bin_type=BIN_TYPE)`<br>
+  **Calculates the Mutual Information of two discrete variables**<br>
+  x: *ndarray (ndim of 1)*<br>
+  y: *ndarray (ndim of 1)*<br>
+  normalized: *bool*<br>
+  n_bins: *int | list\[int]* --- number of bins with which to discretize x and y<br>
+  bin_type: *str = 'fixed' | 'quantile'* --- type of bins with which to discretize x and y<br>
+  returns: *float*<br>
 
+- `def disc_CMI(x, y, z, normalized=False, n_bins=NUM_BINS, bin_type=BIN_TYPE)`<br>
+  **Calculates the Conditional Mutual Information of two discrete variables conditioned on a third variable**<br>
+  x: *ndarray (ndim of 1)*<br>
+  y: *ndarray (ndim of 1)*<br>
+  z: *ndarray (ndim of 1)*<br>
+  normalized: *bool*<br>
+  n_bins: *int | list\[int]* --- number of bins with which to discretize x, y, and z<br>
+  bin_type: *str = 'fixed' | 'quantile'* --- type of bins with which to discretize x, y, and z<br>
+  returns: *float*<br>
 
+- `def disc_II(x, y, z, normalized=False, n_bins=NUM_BINS, bin_type=BIN_TYPE)`<br>
+  **Calculates the Interaction Information of three discrete variables**<br>
+  x: *ndarray (ndim of 1)*<br>
+  y: *ndarray (ndim of 1)*<br>
+  z: *ndarray (ndim of 1)*<br>
+  normalized: *bool*<br>
+  n_bins: *int | list\[int]* --- number of bins with which to discretize x, y, and z<br>
+  bin_type: *str = 'fixed' | 'quantile'* --- type of bins with which to discretize x, y, and z<br>
+  returns: *float*<br>
 
+- `def KSG_MI(x, y, k=NUM_BINS, normalized=False)`<br>
+  **Calculates the Mutual Information of two continuous variables using the Kraskov-Stoegbauer-Grassberger estimator**<br>
+  x: *ndarray (ndim of 1)*<br>
+  y: *ndarray (ndim of 1)*<br>
+  k: *int*<br>
+  normalized: *bool*<br>
+  returns: *float*<br>
 
+- `def KSG_CMI(x, y, z, normalized=False, n_bins=NUM_BINS, bin_type=BIN_TYPE)`<br>
+  **Calculates the Conditional Mutual Information of two continuous variables conditioned on a third variable using the Kraskov-Stoegbauer-Grassberger estimator**<br>
+  x: *ndarray (ndim of 1)*<br>
+  y: *ndarray (ndim of 1)*<br>
+  z: *ndarray (ndim of 1)*<br>
+  normalized: *bool*<br>
+  n_bins: *int | list\[int]* --- number of bins with which to discretize x, y, and z<br>
+  bin_type: *str = 'fixed' | 'quantile'* --- type of bins with which to discretize x, y, and z<br>
+  returns: *float*<br>
 
+- `def KSG_II(x, y, z, normalized=False, n_bins=NUM_BINS, bin_type=BIN_TYPE)`<br>
+  **Calculates the Interaction Information of three discrete variables using the Kraskov-Stoegbauer-Grassberger estimator**<br>
+  x: *ndarray (ndim of 1)*<br>
+  y: *ndarray (ndim of 1)*<br>
+  z: *ndarray (ndim of 1)*<br>
+  normalized: *bool*<br>
+  n_bins: *int | list\[int]* --- number of bins with which to discretize x, y, and z<br>
+  bin_type: *str = 'fixed' | 'quantile'* --- type of bins with which to discretize x, y, and z<br>
+  returns: *float*<br>
+---
 
 ## License
 MIT
