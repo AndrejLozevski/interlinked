@@ -273,7 +273,7 @@ def load_voluseg_data(path):
     assert raw_traces.shape == cell_traces.shape == baseline.shape
 
     bmap = volume_data["volume_mean"][:].astype(np.float32)
-    rois = cell_data["volume_id"][:].T.astype(np.float32)
+    rois = cell_data["volume_id"][:].T.astype(np.int64)
 
     shape = (
         cell_traces.shape[0],    # Lc, cell count
@@ -301,7 +301,7 @@ def load_combined_data(path, metadata=False):
     path = _ensure_combined_path(path)
 
     with h5py.File(path / "combined_segdata.h5", "r") as file:
-        rois = file["rois"][:]
+        rois = file["rois"][:].astype(np.int64)
         cell_traces = file["traces"][:]
         bmap = file["bmap"][:]
         shape = file["shape"][:]
