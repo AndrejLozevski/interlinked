@@ -26,7 +26,8 @@ class Defaults:
     TEMP_DIR:    Path = Path("/tmp/interlinked")
     TEMP_PREFIX: str  = "__temp__"
     TEMP_SUFFIX: str  = ".dat"
-    CLEAR_TEMP:   bool = False
+    CLEAR_TEMP:  bool = False
+    LOW_RAM:     bool = False
 
     # Parallel parameters
     BATCH_SIZE:  int = 1000

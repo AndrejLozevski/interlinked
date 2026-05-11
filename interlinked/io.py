@@ -49,18 +49,18 @@ def find_file(path, pattern, allow_multiple=False):
 
 # Loads a file
 def load_file(path, pattern, allow_pickle=False):
-    path = _path(path)
-    file = find_file(path, pattern, False)
+    file = _path(path)
+    if not file.is_file():
+        file = find_file(file, pattern, allow_multiple=False)
 
-    for f in file:
-        if file.suffix == ".npy":
-            data = np.load(file, allow_pickle=allow_pickle)
-        elif file.suffix == ".tif":
-            data = tiff.imread(file)
-        elif file.suffix in [".h5", ".hdf5"]:
-            data = h5py.File(file, "r")
-        else:
-            lnk.meta.Error("Unrecognized file extension: '%s'", file.suffix)
+    if file.suffix == ".npy":
+        data = np.load(file, allow_pickle=allow_pickle)
+    elif file.suffix == ".tif":
+        data = tiff.imread(file)
+    elif file.suffix in [".h5", ".hdf5"]:
+        data = h5py.File(file, "r")
+    else:
+        lnk.meta.Error("Unrecognized file extension: '%s'", file.suffix)
     return data
 
 # Creates temporary filename (for memmap files)
