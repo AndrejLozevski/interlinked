@@ -170,7 +170,7 @@ checksum = "0175f63815ce00183bf755155ad0cb48c65226c5d17a724e369c25418d2b7699"
 
 [[package]]
 name = "interlinked"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "kiddo",
  "ndarray",
