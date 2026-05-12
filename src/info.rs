@@ -1,4 +1,5 @@
 use std::f64::consts::LN_2;
+use std::cmp::Ordering;
 use pyo3::prelude::*;
 use pyo3::exceptions::PyValueError;
 
@@ -9,9 +10,8 @@ use kiddo::KdTree;
 use kiddo::distance_metric::DistanceMetric;
 
 
-fn digamma(
-    x: f64
-) -> f64 {
+#[inline(always)]
+fn digamma(x: f64) -> f64 {
     if x <= 0.0 {
         return f64::NAN;
     }
@@ -31,43 +31,56 @@ fn digamma(
     result
 }
 
+#[inline]
+fn build_dig_table(n: usize) -> Vec<f64> {
+    (0..=n).map(|i| digamma(i as f64 + 1.0)).collect()
+}
+
 struct Chebyshev;
 impl DistanceMetric<f64, 1> for Chebyshev {
-    #[inline]
+    #[inline(always)]
     fn dist(a: &[f64; 1], b: &[f64; 1]) -> f64 {
         (a[0] - b[0]).abs()
     }
+    #[inline(always)]
     fn dist1(a: f64, b: f64) -> f64 {
         (a - b).abs()
     }
 }
 impl DistanceMetric<f64, 2> for Chebyshev {
-    #[inline]
+    #[inline(always)]
     fn dist(a: &[f64; 2], b: &[f64; 2]) -> f64 {
         (a[0] - b[0]).abs().max((a[1] - b[1]).abs())
     }
+    #[inline(always)]
     fn dist1(a: f64, b: f64) -> f64 {
         (a - b).abs()
     }
 }
 impl DistanceMetric<f64, 3> for Chebyshev {
-    #[inline]
+    #[inline(always)]
     fn dist(a: &[f64; 3], b: &[f64; 3]) -> f64 {
         (a[0] - b[0]).abs()
             .max((a[1] - b[1]).abs())
             .max((a[2] - b[2]).abs())
     }
+    #[inline(always)]
     fn dist1(a: f64, b: f64) -> f64 {
         (a - b).abs()
     }
 }
 
-#[inline]
+#[inline(always)]
 fn count_within_1d(sorted: &[f64], query: f64, eps: f64) -> usize {
     let lo = sorted.partition_point(|&v| v <= query - eps);
     let hi = sorted.partition_point(|&v| v <  query + eps);
     (hi - lo).saturating_sub(1)
 }
+
+//#[inline]
+//fn par_sort(v: &mut Vec<f64>) {
+//    v.par_sort_unstable_by(|a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal));
+//}
 
 fn knn_eps_2d(tree: &KdTree<f64, 2>, x: &[f64], y: &[f64], k: usize) -> Vec<f64> {
     x.par_iter()
@@ -150,8 +163,7 @@ pub fn kl_h(
         tree.add(&[xi], i as u64);
     }
 
-    let h = entropy_kl_1d_tree(&tree, &x, k);
-    Ok(h)
+    Ok(entropy_kl_1d_tree(&tree, &x, k))
 }
 
 #[pyfunction]
@@ -184,12 +196,29 @@ pub fn ksg_mi(
     }
 
     let mut x_sort = x.clone();
-    let mut y_sort = x.clone();
+    let mut y_sort = y.clone();
     x_sort.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
     y_sort.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
 
-    let eps = knn_eps_2d(&tree_xy, &x, &y, k);
+    //let (mut x_sort, mut y_sort) = (x.clone(), y.clone());
+    //rayon::join(
+    //    || par_sort(&mut x_sort),
+    //    || par_sort(&mut y_sort),
+    //);
 
+    //let dig_table = build_dig_table(n);
+    //let sum_dig: f64 = (0..n)
+    //    .into_par_iter()
+    //    .map(|i| {
+    //        let eps = tree_xy
+    //        let e = eps[i];
+    //        let n_x = count_within_1d(&x_sort, x[i], e);
+    //        let n_y = count_within_1d(&y_sort, y[i], e);
+    //        digamma(n_x as f64 + 1.0) + digamma(n_y as f64 + 1.0)
+    //    })
+    //    .sum();
+
+    let eps = knn_eps_2d(&tree_xy, &x, &y, k);
     let sum_dig: f64 = (0..n)
         .into_par_iter()
         .map(|i| {
@@ -391,7 +420,7 @@ pub fn ksg_ii(
                 - digamma(n_yz as f64 + 1.0)
         })
         .sum();
-    let cmi = (digamma(k as f64) + (sum_dig_cmi / n as f64)).max(0.0);
+    let cmi = digamma(k as f64) + (sum_dig_cmi / n as f64);
 
     let ii_raw = cmi - mi;
 
