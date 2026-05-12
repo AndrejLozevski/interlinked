@@ -1,5 +1,4 @@
 use std::f64::consts::LN_2;
-use std::cmp::Ordering;
 use pyo3::prelude::*;
 use pyo3::exceptions::PyValueError;
 
@@ -29,11 +28,6 @@ fn digamma(x: f64) -> f64 {
             - inv_z2 * (1.0 / 120.0
                 - inv_z2 / 252.0));
     result
-}
-
-#[inline]
-fn build_dig_table(n: usize) -> Vec<f64> {
-    (0..=n).map(|i| digamma(i as f64 + 1.0)).collect()
 }
 
 struct Chebyshev;
@@ -76,11 +70,6 @@ fn count_within_1d(sorted: &[f64], query: f64, eps: f64) -> usize {
     let hi = sorted.partition_point(|&v| v <  query + eps);
     (hi - lo).saturating_sub(1)
 }
-
-//#[inline]
-//fn par_sort(v: &mut Vec<f64>) {
-//    v.par_sort_unstable_by(|a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal));
-//}
 
 fn knn_eps_2d(tree: &KdTree<f64, 2>, x: &[f64], y: &[f64], k: usize) -> Vec<f64> {
     x.par_iter()
@@ -200,24 +189,6 @@ pub fn ksg_mi(
     x_sort.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
     y_sort.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
 
-    //let (mut x_sort, mut y_sort) = (x.clone(), y.clone());
-    //rayon::join(
-    //    || par_sort(&mut x_sort),
-    //    || par_sort(&mut y_sort),
-    //);
-
-    //let dig_table = build_dig_table(n);
-    //let sum_dig: f64 = (0..n)
-    //    .into_par_iter()
-    //    .map(|i| {
-    //        let eps = tree_xy
-    //        let e = eps[i];
-    //        let n_x = count_within_1d(&x_sort, x[i], e);
-    //        let n_y = count_within_1d(&y_sort, y[i], e);
-    //        digamma(n_x as f64 + 1.0) + digamma(n_y as f64 + 1.0)
-    //    })
-    //    .sum();
-
     let eps = knn_eps_2d(&tree_xy, &x, &y, k);
     let sum_dig: f64 = (0..n)
         .into_par_iter()
@@ -293,27 +264,26 @@ pub fn ksg_cmi(
 
     let mut z_sort = z.clone();
     z_sort.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
-
-    let eps = knn_eps_3d(&tree_xyz, &x, &y, &z, k);
-
-    let sum_dig: f64 = (0..n)
-        .into_par_iter()
-        .map(|i| {
-            let e = eps[i];
-            let n_xz = tree_xz
-                .within_unsorted::<Chebyshev>(&[x[i], z[i]], e)
-                .len()
-                .saturating_sub(1);
-            let n_yz = tree_yz
-                .within_unsorted::<Chebyshev>(&[y[i], z[i]], e)
-                .len()
-                .saturating_sub(1);
-            let n_z = count_within_1d(&z_sort, z[i], e);
-            digamma(n_z as f64 + 1.0)
-                - digamma(n_xz as f64 + 1.0)
-                - digamma(n_yz as f64 + 1.0)
-        })
-        .sum();
+      
+   let eps = knn_eps_3d(&tree_xyz, &x, &y, &z, k);
+   let sum_dig: f64 = (0..n)
+       .into_par_iter()
+       .map(|i| {
+           let e = eps[i];
+           let n_xz = tree_xz
+               .within_unsorted::<Chebyshev>(&[x[i], z[i]], e)
+               .len()
+               .saturating_sub(1);
+           let n_yz = tree_yz
+               .within_unsorted::<Chebyshev>(&[y[i], z[i]], e)
+               .len()
+               .saturating_sub(1);
+           let n_z = count_within_1d(&z_sort, z[i], e);
+           digamma(n_z as f64 + 1.0)
+               - digamma(n_xz as f64 + 1.0)
+               - digamma(n_yz as f64 + 1.0)
+       })
+       .sum();
 
     let cmi_raw = (digamma(k as f64) + (sum_dig / n as f64)).max(0.0);
 
@@ -379,8 +349,6 @@ pub fn ksg_ii(
         tree_xz.add(&[xi, zi],      i as u64);
         tree_yz.add(&[yi, zi],      i as u64);
     }
-
-
 
     let mut x_sort = x.clone();
     let mut y_sort = y.clone();
