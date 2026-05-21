@@ -260,14 +260,18 @@ def _ensure_voluseg_path(path):
     return path
 
 # Loads VoluSeg data from the given path
-def load_voluseg_data(path):
+def load_voluseg_data(path, use_percentile=True):
     path = _ensure_voluseg_path(path)
 
     volume_data = h5py.File(path / "volume0.hdf5",      "r")
     cell_data   = h5py.File(path / "cells0_clean.hdf5", "r")
 
-    raw_traces = cell_data["cell_timeseries"][:].astype(np.float32)
-    baseline   = cell_data["cell_baseline"][:].astype(np.float32)
+    if use_percentile:
+        raw_traces = cell_data["cell_timeseries_raw"][:].astype(np.float32)
+        baseline = np.percentile(cell_traces, 20, axis=1, keepdims=True)
+    else:
+        raw_traces = cell_data["cell_timeseries"][:].astype(np.float32)
+        baseline   = cell_data["cell_baseline"][:].astype(np.float32)
     cell_traces = (raw_traces - baseline) / np.abs(lnk.utils.divisor(baseline))
     cell_traces = (cell_traces - cell_traces.mean()) / cell_traces.std()
     assert raw_traces.shape == cell_traces.shape == baseline.shape
