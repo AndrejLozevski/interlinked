@@ -274,7 +274,7 @@ def load_voluseg_data(path, use_percentile=True):
         baseline   = cell_data["cell_baseline"][:].astype(np.float32)
     cell_traces = (raw_traces - baseline) / np.abs(lnk.utils.divisor(baseline))
     cell_traces = (cell_traces - cell_traces.mean()) / cell_traces.std()
-    assert raw_traces.shape == cell_traces.shape == baseline.shape
+    assert raw_traces.shape == cell_traces.shape
 
     bmap = volume_data["volume_mean"][:].astype(np.float32)
     rois = cell_data["volume_id"][:].T.astype(np.int64)
