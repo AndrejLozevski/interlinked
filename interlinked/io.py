@@ -203,7 +203,7 @@ def _load_rois(cell_locations, shape):
 def _load_brainmap(ops, shape):
     Lc, Lt, Lz, Ly, Lx = shape
     mean = ops["meanImg"].astype(np.float32)
-    bmap = lnk.form_volume(mean, (Lz, Ly, Lx))
+    bmap = lnk.form.form_volume(mean, (Lz, Ly, Lx))
 
     Oy, Ox = mean.shape
     assert (Oy//Ly) * (Ox//Lx) >= Lz
