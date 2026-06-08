@@ -111,14 +111,21 @@ Any ALL-CAPS variable listed below can be assumed as a parameter found in the de
   n: *int* --- desired range of the output array<br>
   dtype: *dtype* --- target dtype of output array<br>
   returns: *ndarray (ndim of 1)*<br>
+
+- `def interpolate(x, xp, fp)`<br>
+  **Interpolates an input array with vectorized calculation**<br>
+  x: *ndarray (ndim of 1)* --- x-values of target data<br>
+  xp: *ndarray (ndim of 1)* --- x-values of input data<br>
+  fp: *ndarray (ndim of 2)* --- y-values of input data<br>
+  returns: *ndarray (ndim of 2)*<br>
     
 - `def dff(raw, downsample=1, percentile=20, window=300)`<br>
   **Calculates the ΔF/F of a calcium trace using a percentile filter and a sliding window**<br>
-  raw: *ndarray (ndim of 1)* --- input array for which to calculate ΔF/F<br>
+  raw: *ndarray (ndim of 1 or 2)* --- input array for which to calculate ΔF/F, assuming shape (cells, timepoints)<br>
   downsample: *int* --- downsampling factor (setting to 1 prevents downsampling)<br>
   percentile: *float* --- percentile with which to calculate the baseline of the time series<br>
   window: *int* --- sliding window size with which to calculate the baseline of the time series<br>
-  returns: *ndarray (ndim of 1)*<br>
+  returns: *ndarray (ndim of raw)*<br>
 
 - `def divisor(arr, minimum=1, default_positive=True)`<br>
   **Converts an input array into a safe divisor for array division, keeping sign and preventing unintentional mulitiplication**<br>
@@ -187,10 +194,11 @@ Any ALL-CAPS variable listed below can be assumed as a parameter found in the de
   path: *str | Path* --- directory to search for the metadata<br>
   returns: *tuple(float, float, float, float)*<br>
 
-- `def load_suite2p_data(path)`<br>
+- `def load_suite2p_data(path, mode="auto")`<br>
   **Loads the labeled volume of all ROIs, cell activity traces, time-averaged brainmap, data shape, and ops from a Suite2p-containing directory**<br>
   *Requires the existence of stat.npy, F.npy, and ops.npy files*<br>
   path: *str | Path* --- directory containing Suite2p files<br>
+  mode: *str* ("auto", "percentile") --- method of ΔF/F calculation<br>
   returns:<br> 
   - *ndarray (ndim of 3)* --- labeled volume (z,y,x)<br>
   - *ndarray (ndim of 2)* --- cell traces (c,t)<br>
@@ -198,26 +206,30 @@ Any ALL-CAPS variable listed below can be assumed as a parameter found in the de
   - *tuple(int, int, int, int, int)* --- data shape (Lc,Lt,Lz,Ly,Lx)<br>
   - *Suite2p Ops*<br>
 
-- `def load_voluseg_data(path)`<br>
-  **Loads the labeled volume of all ROIs, cell activity traces, time-averaged brainmap, and data shape VoluSeg-containing directory**<br>
+- `def load_voluseg_data(path, mode="auto")`<br>
+  **Loads the labeled volume of all ROIs, cell activity traces, time-averaged brainmap, and data shape from a VoluSeg-containing directory**<br>
   *Requires the existence of volume0.hdf5 and cells0_clean.hdf5 files*<br>
   path: *str | Path* --- directory containing VoluSeg files<br>
+  mode: *str* ("auto", "percentile", "voluseg") --- method of ΔF/F calculation<br>
   returns:<br> 
   - *ndarray (ndim of 3)* --- labeled volume (z,y,x)<br>
-  - *ndarray (ndim of 2)* --- cell traces (c,t)<br>
+  - *ndarray (ndim of 2)* --- ΔF/F cell traces (c,t)<br>
   - *ndarray (ndim of 3)* --- brainmap (z,y,x)<br>
   - *tuple(int, int, int, int, int)* --- data shape (Lc,Lt,Lz,Ly,Lx)<br>
 
-- `def load_combined_data(path)`<br>
-  **Loads the labeled volume of all ROIs, ROI activity traces, time-averaged brainmap, and data shape Combined-Segmentation-containing directory**<br>
+- `def load_combined_data(path, file="segdata.h5")`<br>
+  **Loads the labeled volume of all ROIs, ROI activity traces, time-averaged brainmap, and data shape from a Combined-Segmentation-containing directory**<br>
   *Requires the existence of a combined_segdata.h5 file*<br>
-  *Last Lc rows in ROI traces are Suite2p-identified cells. First (Lr - Lc) rows are VoluSeg-identified ROIs*<br>
   path: *str | Path* --- directory containing combined file<br>
+  file: *str* --- name of combined file<br>
   returns:<br> 
   - *ndarray (ndim of 3)* --- labeled volume (z,y,x)<br>
   - *ndarray (ndim of 2)* --- ROI traces (r,t)<br>
   - *ndarray (ndim of 3)* --- brainmap (z,y,x)<br>
-  - *tuple(int, int, int, int, int)* --- data shape (Lr,Lc,Lt,Lz,Ly,Lx)<br>
+  - *ndarray ([int, int, int, int, int\])* --- data shape (Lr,Lc,Lt,Lz,Ly,Lx)<br>
+  - *ndarray ([float, float, float, float\])* --- metadata (Rt,Rz,Ry,Rx)<br>
+  - *ndarray (ndim of 1)* --- Ids of Suite2p-identified ROIs
+  - *ndarray (ndim of 1)* --- Ids of VoluSeg-identified ROIs
 
 - `def build_trials(drift)`<br>
   **Builds a trials-by-timepoints (Ln,Ltt) array of timepoint indices**<br>

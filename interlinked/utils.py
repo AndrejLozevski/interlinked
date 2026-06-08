@@ -29,18 +29,20 @@ def digitize(data, n, dtype=np.int32):
     data = np.digitize(data, bins)
     return data.astype(dtype)
 
-# Calculates dF/F from raw data
-def dff(raw, downsample=1, percentile=20, window=300):
-    if downsample == 1:
-        baseline = sp.ndimage.filters.percentile_filter(raw, percentile=percentile, size=window)
-    else:
-        decimated = sp.signal.decimate(raw, downsample, ftype="iir", zero_phase=True)
-        decimated += raw.min() - decimated.min()
-        baseline = sp.ndimage.filters.percentile_filter(decimated, percentile=percentile, size=window//downsample)
+# Interpolates with vectorization
+def interpolate(x, xp, fp):
+    idx = np.searchsorted(xp, x, side='right') - 1
+    idx = np.clip(idx, 0, len(xp) - 2)
 
-    baseline = np.interp(range(0, len(raw)), range(0, len(raw), downsample), baseline)
-    assert len(baseline) == len(raw)
-    return (raw - baseline) / (baseline - baseline.min() + 1)
+    x_lo = xp[idx]
+    x_hi = xp[idx+1]
+
+    f_lo = fp[:,idx]
+    f_hi = fp[:,idx+1]
+
+    t = (x - x_lo) / (x_hi - x_lo)
+    t = np.clip(t, 0, 1)
+    return f_lo + t * (f_hi - f_lo)
 
 # Safely converts a numpy array into a safe divisor
 def divisor(arr, minimum=1, default_positive=True):
@@ -48,6 +50,23 @@ def divisor(arr, minimum=1, default_positive=True):
     signs = np.sign(arr)
     signs[signs == 0] = default_sign
     return signs * np.maximum(np.abs(arr), minimum)
+
+# Calculates dF/F from raw data
+def dff(raw, downsample=1, percentile=20, window=300):
+    if raw.ndim == 1:
+        raw = np.expand_dims(raw, axis=0)
+
+    if downsample == 1:
+        baseline = sp.ndimage.percentile_filter(raw, percentile=percentile, size=(1, window))
+    else:
+        decimated = sp.signal.decimate(raw, downsample, axis=-1, ftype="iir", zero_phase=True)
+        decimated += raw.min() - decimated.min()
+        baseline = sp.ndimage.percentile_filter(decimated, percentile=percentile, size=(1, window//downsample))
+
+    Lc, Lt = raw.shape
+    baseline = interpolate(range(0, Lt), range(0, Lt, downsample), baseline)
+    assert len(baseline) == len(raw)
+    return (raw - baseline) / np.abs(divisor(baseline))
 
 # Convolves a time series with an exponential decay function
 def decay(data, tau=2.00, width=16, inv=False):

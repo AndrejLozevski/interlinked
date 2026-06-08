@@ -220,15 +220,20 @@ def _load_brainmap(ops, shape):
     return bmap
 
 # Loads Suite2p data from the given path
-def load_suite2p_data(path):
+def load_suite2p_data(path, mode="auto"):
     path = _ensure_suite2p_path(path)
     cell_locations = np.load(path / "stat.npy", allow_pickle=True)
     cell_traces    = np.load(path / "F.npy",    allow_pickle=True)
     ops            = np.load(path / "ops.npy",  allow_pickle=True).item()
 
-    baseline = np.percentile(cell_traces, 20, axis=1, keepdims=True)
-    cell_traces = (cell_traces - baseline) / np.abs(lnk.utils.divisor(baseline))
-    cell_traces = (cell_traces - cell_traces.mean()) / cell_traces.std()
+    if mode == "auto":
+        cell_traces = lnk.utils.dff(cell_traces)
+    elif mode == "percentile":
+        baseline = np.percentile(cell_traces, 20, axis=1, keepdims=True)
+        cell_traces = (cell_traces - baseline) / np.abs(lnk.utils.divisor(baseline))
+        cell_traces = (cell_traces - cell_traces.mean()) / cell_traces.std()
+    else:
+        lnk.meta.Error("Mode '%s' is not a valid mode", mode, error=ValueError)
 
     shape = (
         cell_traces.shape[0],    # Lc, cell count
@@ -260,20 +265,27 @@ def _ensure_voluseg_path(path):
     return path
 
 # Loads VoluSeg data from the given path
-def load_voluseg_data(path, use_percentile=True):
+def load_voluseg_data(path, mode="auto"):
     path = _ensure_voluseg_path(path)
 
     volume_data = h5py.File(path / "volume0.hdf5",      "r")
     cell_data   = h5py.File(path / "cells0_clean.hdf5", "r")
 
-    if use_percentile:
+    if mode == "auto":
         raw_traces = cell_data["cell_timeseries_raw"][:].astype(np.float32)
-        baseline = np.percentile(raw_traces, 20, axis=1, keepdims=True)
+        cell_traces = lnk.utils.dff(raw_traces)
     else:
-        raw_traces = cell_data["cell_timeseries"][:].astype(np.float32)
-        baseline   = cell_data["cell_baseline"][:].astype(np.float32)
-    cell_traces = (raw_traces - baseline) / np.abs(lnk.utils.divisor(baseline))
-    cell_traces = (cell_traces - cell_traces.mean()) / cell_traces.std()
+        if mode == "percentile":
+            raw_traces = cell_data["cell_timeseries_raw"][:].astype(np.float32)
+            baseline = np.percentile(raw_traces, 20, axis=1, keepdims=True)
+        elif auto == "voluseg":
+            raw_traces = cell_data["cell_timeseries"][:].astype(np.float32)
+            baseline   = cell_data["cell_baseline"][:].astype(np.float32)
+        else:
+            lnk.meta.Error("Mode '%s' is not a valid mode", mode, error=ValueError)
+
+        cell_traces = (raw_traces - baseline) / np.abs(lnk.utils.divisor(baseline))
+        cell_traces = (cell_traces - cell_traces.mean()) / cell_traces.std()
     assert raw_traces.shape == cell_traces.shape
 
     bmap = volume_data["volume_mean"][:].astype(np.float32)
@@ -291,28 +303,28 @@ def load_voluseg_data(path, use_percentile=True):
 
 #--| Combined Data |---------------------------------------------------------------------#
 
-# Ensures that the provided path is the Suite2p combined directory
-def _ensure_combined_path(path):
+# Ensures that the provided path contains the combined data
+def _ensure_combined_path(path, file="segdata.h5"):
     path = _path(path)
-    needed_files = ["combined_segdata.h5"]
-    for file in needed_files:
-        if path / file not in list(path.iterdir()):
-            lnk.meta.Error("File '%s' not found in %s", file, path, error=FileNotFoundError)
+    needed_files = [file]
+    for f in needed_files:
+        if path / f not in list(path.iterdir()):
+            lnk.meta.Error("File '%s' not found in %s", f, path, error=FileNotFoundError)
     return path
 
-# Loads VoluSeg data from the given path
-def load_combined_data(path, metadata=False):
-    path = _ensure_combined_path(path)
+# Loads combined data from the given path
+def load_combined_data(path, file="segdata.h5"):
+    path = _ensure_combined_path(path, file)
 
-    with h5py.File(path / "combined_segdata.h5", "r") as file:
-        rois = file["rois"][:].astype(np.int64)
-        cell_traces = file["traces"][:]
-        bmap = file["bmap"][:]
-        shape = file["shape"][:]
-        if metadata:
-            metadata = file["metadata"][:]
-            return rois, cell_traces, bmap, shape, metadata
-        return rois, cell_traces, bmap, shape
+    with h5py.File(path / file, "r") as f:
+        rois     = f["rois"][:].astype(np.int64)
+        traces   = f["traces"][:]
+        bmap     = f["brainmap"][:]
+        shape    = f["shape"][:]
+        metadata = f["metadata"][:]
+        s2p_rois = f["s2p_rois"][:]
+        vsg_rois = f["vsg_rois"][:]
+        return rois, cell_traces, bmap, shape, metadata, s2p_rois, vsg_rois
 
 
 #--| Trials |---------------------------------------------------------------------------#
