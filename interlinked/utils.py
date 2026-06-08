@@ -31,6 +31,10 @@ def digitize(data, n, dtype=np.int32):
 
 # Interpolates with vectorization
 def interpolate(x, xp, fp):
+    x  = np.asarray(x,  dtype=np.float32)
+    xp = np.asarray(xp, dtype=np.float32)
+    fp = np.asarray(xp, dtype=np.float32)
+
     idx = np.searchsorted(xp, x, side='right') - 1
     idx = np.clip(idx, 0, len(xp) - 2)
 
