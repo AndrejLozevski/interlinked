@@ -40,7 +40,7 @@ def find_file(path, pattern, allow_multiple=False):
     if len(files) == 0:
         lnk.meta.Error("No '%s' file found in '%s'", pattern, path, error=FileNotFoundError)
     if len(files) > 1:
-        if multiple:
+        if allow_multiple:
             return files
         lnk.meta.Error("Found %s file(s) with the pattern '%s' in '%s'", len(files), pattern, path)
 
