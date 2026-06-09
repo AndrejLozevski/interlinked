@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "interlinked-lab"
-version = "0.1.11"
+version = "0.1.12"
 requires-python = ">=3.10"
 dependencies = [
     "numpy >= 2.0.0",

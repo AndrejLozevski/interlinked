@@ -4,28 +4,28 @@ import logging
 log = logging.getLogger(__name__)
 
 
-MSG_SUCCESS   = "Script completed!"
-MSG_ERROR     = "Error occured!"
-MSG_EXCEPTION = "Exception occured!"
+MSG_SUCCESS = "Script completed!"
+MSG_ERROR   = "Error occured!"
+MSG_WARNING = "Warning triggered!"
 
-class Success(SystemExit):
+class Success():
     def __init__(self, message=MSG_SUCCESS, *args):
         log.info(message, *args)
-        super().__init__(0)
+        return sys.exit(0)
 
-class Error(SystemExit):
+class Error():
     def __init__(self, message=MSG_ERROR, *args, error=None):
         if error is not None:
             name = error.__name__ if isinstance(error, type) else str(error)
             message = f"{name}: {message}"
         log.error(message, *args)
-        super().__init__(1)
+        return sys.exit(1)
 
-class Exception(Exception):
-    def __init__(self, message=MSG_EXCEPTION, *args, exception=None):
-        if exception is not None:
-            name = exception.__name__ if isinstance(exception, type) else str(exception)
+class Warning():
+    def __init__(self, message=MSG_WARNING, *args, warning=None):
+        if warning is not None:
+            name = warning.__name__ if isinstance(warning, type) else str(warning)
             message = f"{name}: {message}"
-        log.error(message, *args)
-        super().__init__()
+        log.warning(message, *args)
+        return
 
