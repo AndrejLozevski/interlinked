@@ -191,7 +191,7 @@ def _load_rois(cell_locations, shape):
     for c in range(Lc):
         ypix   = cell_locations[c]["ypix"]
         xpix   = cell_locations[c]["xpix"]
-        zplane = cell_locations[c]["iplane"]
+        zplane = cell_locations[c].get("iplane", 0)
         assert len(ypix) == len(xpix)
 
         for i in range(len(ypix)):
