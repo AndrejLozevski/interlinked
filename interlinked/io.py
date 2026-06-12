@@ -228,6 +228,8 @@ def load_suite2p_data(path, mode="auto"):
 
     if mode == "auto":
         cell_traces = lnk.utils.dff(cell_traces)
+    if mode == "raw":
+        cell_traces = cell_traces.astype(np.float32)
     elif mode == "percentile":
         baseline = np.percentile(cell_traces, 20, axis=1, keepdims=True)
         cell_traces = (cell_traces - baseline) / np.abs(lnk.utils.divisor(baseline))
@@ -274,6 +276,8 @@ def load_voluseg_data(path, mode="auto"):
     if mode == "auto":
         raw_traces = cell_data["cell_timeseries_raw"][:].astype(np.float32)
         cell_traces = lnk.utils.dff(raw_traces)
+    elif mode == "raw":
+        cell_traces = cell_data["cell_timeseries_raw"][:].astype(np.float32)
     else:
         if mode == "percentile":
             raw_traces = cell_data["cell_timeseries_raw"][:].astype(np.float32)
@@ -286,7 +290,6 @@ def load_voluseg_data(path, mode="auto"):
 
         cell_traces = (raw_traces - baseline) / np.abs(lnk.utils.divisor(baseline))
         cell_traces = (cell_traces - cell_traces.mean()) / cell_traces.std()
-    assert raw_traces.shape == cell_traces.shape
 
     bmap = volume_data["volume_mean"][:].astype(np.float32)
     rois = cell_data["volume_id"][:].T.astype(np.int64)

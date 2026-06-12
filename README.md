@@ -198,7 +198,7 @@ Any ALL-CAPS variable listed below can be assumed as a parameter found in the de
   **Loads the labeled volume of all ROIs, cell activity traces, time-averaged brainmap, data shape, and ops from a Suite2p-containing directory**<br>
   *Requires the existence of stat.npy, F.npy, and ops.npy files*<br>
   path: *str | Path* --- directory containing Suite2p files<br>
-  mode: *str* ("auto", "percentile") --- method of ΔF/F calculation<br>
+  mode: *str* ("auto", "raw" "percentile") --- method of ΔF/F calculation<br>
   returns:<br> 
   - *ndarray (ndim of 3)* --- labeled volume (z,y,x)<br>
   - *ndarray (ndim of 2)* --- cell traces (c,t)<br>
@@ -210,7 +210,7 @@ Any ALL-CAPS variable listed below can be assumed as a parameter found in the de
   **Loads the labeled volume of all ROIs, cell activity traces, time-averaged brainmap, and data shape from a VoluSeg-containing directory**<br>
   *Requires the existence of volume0.hdf5 and cells0_clean.hdf5 files*<br>
   path: *str | Path* --- directory containing VoluSeg files<br>
-  mode: *str* ("auto", "percentile", "voluseg") --- method of ΔF/F calculation<br>
+  mode: *str* ("auto", "raw", "percentile", "voluseg") --- method of ΔF/F calculation<br>
   returns:<br> 
   - *ndarray (ndim of 3)* --- labeled volume (z,y,x)<br>
   - *ndarray (ndim of 2)* --- ΔF/F cell traces (c,t)<br>
