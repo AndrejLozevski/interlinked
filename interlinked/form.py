@@ -1,6 +1,8 @@
 import sys
 import logging
 import numpy as np
+import scipy as sp
+import skimage as ski
 
 import interlinked as lnk
 
@@ -10,6 +12,7 @@ log = logging.getLogger(__name__)
 #--| Constants |------------------------------------------------------------------------#
 
 ROW_TILES = 5
+
 
 #--| Reshaping |------------------------------------------------------------------------#
 
@@ -132,7 +135,30 @@ def weight_rois(rois, weights):
     return weighted
 
 
+#--| Alignment |-----------------------------------------------------------------------------#
 
+# Aligns one array to a reference array
+def align_arrays(arr, ref, factor=100, order=3):
+    if not arr.ndim == ref.ndim:
+        lnk.meta.Error("Array and reference array must have same dimensionality", error=ValueError)
 
+    shift, _, _ = ski.registration.phase_cross_correlation(arr, ref, upsample_factor=factor)
+    if arr.ndim == 2:
+        dy, dx = shift
+        transform = np.array([
+            [1, 0, dy],
+            [0, 1, dx]
+        ], np.float32)
+    elif arr.ndim == 3:
+        dy, dx = shift
+        transform = np.array([
+            [1, 0, 0, dz],
+            [0, 1, 0, dy],
+            [0, 0, 1, dx]
+        ], np.float32)
+    else:
+        lnk.meta.Error("Arrays must have dimensionality of 2 or 3", error=ValueError)
 
+        arr = sp.ndimage.affine_transform(arr, transform, order=order)
+        return new, transform
 
