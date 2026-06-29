@@ -172,5 +172,5 @@ def align_arrays(arr, ref, factor=100, order=3):
         lnk.meta.Error("Arrays must have dimensionality of 2 or 3", error=ValueError)
 
     arr = sp.ndimage.affine_transform(arr, transform, order=order)
-    return new, transform
+    return arr, transform
 
