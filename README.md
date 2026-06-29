@@ -272,11 +272,27 @@ Any ALL-CAPS variable listed below can be assumed as a parameter found in the de
   keep: *bool* --- if True, remove whatever rois are not selected, and if False, remove whatever rois are selected<br>
   returns: *ndarray*<br>
 
+- `def validate_rois(rois, Lc=0, throw_err=True)`<br>
+  **Checks if all ROIs in a labeled array are valid and without gaps**<br>
+  rois: *ndarray* --- labeled array<br>
+  Lc: *int* --- number of expected labels excluding background<br>
+  throw_err: *bool* --- throw an error if validation fails, otherwise return True/False<br>
+  returns: *bool* or *None*<br>
+
 - `def weight_rois(rois, weights)`<br>
   **Substitutes a labeled array with each label's corresponding weight**<br>
   rois: *ndarray* --- labeled array<br>
   weights: *list\[float] | ndarray (ndim of 1)* --- weights corresponding to each label<br>
   returns: *ndarray*<br>
+
+- `def align_arrays(arr, ref, factor=100, order=3)`<br>
+  **Aligns one array to a reference array of same dimensionality**<br>
+  arr: *ndarray* --- input array<br>
+  ref: *ndarray* --- reference array<br>
+  factor: *int* --- precision of alignment<br>
+  returns:<br>
+  - *ndarray* --- aligned input array<br>
+  - *ndarray* --- transform array<br>
 ---
 
 ### Stats<br>

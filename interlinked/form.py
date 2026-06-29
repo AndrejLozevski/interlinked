@@ -112,19 +112,31 @@ def remove_rois(arr, rois, keep=False):
         arr[lookup[arr]] = arr.min()
     return arr
 
-# Ensures ROIs in a labeled array are valid and without gaps
-def validate_rois(rois, Lc=0):
+# Checks if ROIs in a labeled array are valid and without gaps
+def validate_rois(rois, Lc=0, throw_err=True):
     if not rois.min() == -1:
+        if not throw_err:
+            return False
         lnk.meta.Error("Background label should be -1, but found: (Min: %s)", rois.min(), error=ValueError)
     if not len(np.unique(rois)) == rois.max()+2:
+        if not throw_err:
+            return False
         lnk.meta.Error("Unique label count should be two more than max label, but found: (Unique: %s, Max: %s)", len(np.unique(rois)), rois.max(), error=ValueError)
     if Lc != 0:
         if not rois.max() == Lc-1:
+            if not throw_err:
+                return False
             lnk.meta.Error("Max label should be one more than roi count, but found: (Max: %s, Lc: %s)", rois.max(), Lc, error=ValueError)
         if not rois.max() - rois.min() == Lc:
+            if not throw_err:
+                return False
             lnk.meta.Error("Max label minus min label should equal roi count, but found: (Max: %s, Min: %s, Lc: %s)", rois.max(), rois.min(), Lc, error=ValueError)
         if not len(np.unique(rois)) == Lc+1:
+            if not throw_err:
+                return False
             lnk.meta.Error("Unique label count should one more than roi count, but found: (Max: %s, Min: %s, Lc: %s)", rois.max(), rois.min(), Lc, error=ValueError)
+    if not throw_err:
+        return True
     return
 
 # Replaces ROIs in a labeled array with their corresponding weights from a list
@@ -150,7 +162,7 @@ def align_arrays(arr, ref, factor=100, order=3):
             [0, 1, dx]
         ], np.float32)
     elif arr.ndim == 3:
-        dy, dx = shift
+        dz, dy, dx = shift
         transform = np.array([
             [1, 0, 0, dz],
             [0, 1, 0, dy],
@@ -159,6 +171,6 @@ def align_arrays(arr, ref, factor=100, order=3):
     else:
         lnk.meta.Error("Arrays must have dimensionality of 2 or 3", error=ValueError)
 
-        arr = sp.ndimage.affine_transform(arr, transform, order=order)
-        return new, transform
+    arr = sp.ndimage.affine_transform(arr, transform, order=order)
+    return new, transform
 
