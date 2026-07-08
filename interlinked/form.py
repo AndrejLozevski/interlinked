@@ -78,7 +78,7 @@ def adjust_rois(arr):
     uniq = np.unique(arr)
     uniq = uniq[uniq != -1]
     if uniq.size == 0:
-        lnk.meta.error("No labels found in array", error=ValueError)
+        lnk.meta.Error("No labels found in array", error=ValueError)
     assert all(uniq >= 0)
     uniq = uniq.astype(np.int64)
 
