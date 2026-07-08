@@ -194,11 +194,11 @@ Any ALL-CAPS variable listed below can be assumed as a parameter found in the de
   path: *str | Path* --- directory to search for the metadata<br>
   returns: *tuple(float, float, float, float)*<br>
 
-- `def load_suite2p_data(path, mode="auto")`<br>
+- `def load_suite2p_data(path, mode="raw")`<br>
   **Loads the labeled volume of all ROIs, cell activity traces, time-averaged brainmap, data shape, and ops from a Suite2p-containing directory**<br>
   *Requires the existence of stat.npy, F.npy, and ops.npy files*<br>
   path: *str | Path* --- directory containing Suite2p files<br>
-  mode: *str* ("auto", "raw" "percentile") --- method of ΔF/F calculation<br>
+  mode: *str* ("raw", "dff" "percentile") --- method of ΔF/F calculation<br>
   returns:<br> 
   - *ndarray (ndim of 3)* --- labeled volume (z,y,x)<br>
   - *ndarray (ndim of 2)* --- cell traces (c,t)<br>
@@ -206,11 +206,11 @@ Any ALL-CAPS variable listed below can be assumed as a parameter found in the de
   - *tuple(int, int, int, int, int)* --- data shape (Lc,Lt,Lz,Ly,Lx)<br>
   - *Suite2p Ops*<br>
 
-- `def load_voluseg_data(path, mode="auto")`<br>
+- `def load_voluseg_data(path, mode="raw")`<br>
   **Loads the labeled volume of all ROIs, cell activity traces, time-averaged brainmap, and data shape from a VoluSeg-containing directory**<br>
   *Requires the existence of volume0.hdf5 and cells0_clean.hdf5 files*<br>
   path: *str | Path* --- directory containing VoluSeg files<br>
-  mode: *str* ("auto", "raw", "percentile", "voluseg") --- method of ΔF/F calculation<br>
+  mode: *str* ("raw", "dff", "percentile", "voluseg") --- method of ΔF/F calculation<br>
   returns:<br> 
   - *ndarray (ndim of 3)* --- labeled volume (z,y,x)<br>
   - *ndarray (ndim of 2)* --- ΔF/F cell traces (c,t)<br>
@@ -219,23 +219,25 @@ Any ALL-CAPS variable listed below can be assumed as a parameter found in the de
 
 - `def load_combined_data(path, file="segdata.h5")`<br>
   **Loads the labeled volume of all ROIs, ROI activity traces, time-averaged brainmap, and data shape from a Combined-Segmentation-containing directory**<br>
-  *Requires the existence of a combined_segdata.h5 file*<br>
-  path: *str | Path* --- directory containing combined file<br>
-  file: *str* --- name of combined file<br>
+  *Requires the existence of a segdata.h5 file*<br>
+  path: *str | Path* --- directory containing combined segdata file<br>
+  file: *str* --- name of combined segdata file<br>
   returns:<br> 
   - *ndarray (ndim of 3)* --- labeled volume (z,y,x)<br>
   - *ndarray (ndim of 2)* --- ROI traces (r,t)<br>
   - *ndarray (ndim of 3)* --- brainmap (z,y,x)<br>
   - *ndarray ([int, int, int, int, int\])* --- data shape (Lr,Lc,Lt,Lz,Ly,Lx)<br>
   - *ndarray ([float, float, float, float\])* --- metadata (Rt,Rz,Ry,Rx)<br>
-  - *ndarray (ndim of 1)* --- Ids of Suite2p-identified ROIs
-  - *ndarray (ndim of 1)* --- Ids of VoluSeg-identified ROIs
+  - *ndarray (ndim of 1)* --- Ids of Suite2p-identified ROIs<br>
+  - *ndarray (ndim of 1)* --- Ids of VoluSeg-identified ROIs<br>
+  - *ndarray (ndim of 2)* --- rigid transformation matrix for alignment<br>
+  - *str* ("suite2p", "voluseg") --- reference brainmap used for alignment<br>
 
 - `def build_trials(drift)`<br>
   **Builds a trials-by-timepoints (Ln,Ltt) array of timepoint indices**<br>
   drift: *ndarray (ndim of 1)* --- drift time series, used to distinguish trials<br>
   min_length: *int* --- length cutoff to distinguish go period from pulses<br>
-  returns: *ndarray (ndim of 2)*
+  returns: *ndarray (ndim of 2)*<br>
 ---
 
 ### Form<br>

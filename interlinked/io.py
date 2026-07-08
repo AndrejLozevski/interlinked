@@ -167,16 +167,9 @@ def load_metadata(path):
 
 #--| Suite2p Data |---------------------------------------------------------------------#
 
-# Ensures that the provided path is the Suite2p combined directory
+# Ensures that the provided path contains the needed Suite2p files
 def _ensure_suite2p_path(path):
     path = _path(path)
-    if (path / "suite2p").exists():
-        path = path / "suite2p"
-    if (path / "combined").exists():
-        path = path / "combined"
-    if path.name != "combined":
-        lnk.meta.Error("No suite2p combined directory found at %s", path, error=FileNotFoundError)
-
     needed_files = ["stat.npy", "F.npy", "ops.npy"]
     for file in needed_files:
         if path / file not in list(path.iterdir()):
@@ -220,16 +213,16 @@ def _load_brainmap(ops, shape):
     return bmap
 
 # Loads Suite2p data from the given path
-def load_suite2p_data(path, mode="auto"):
+def load_suite2p_data(path, mode="raw"):
     path = _ensure_suite2p_path(path)
     cell_locations = np.load(path / "stat.npy", allow_pickle=True)
     cell_traces    = np.load(path / "F.npy",    allow_pickle=True)
     ops            = np.load(path / "ops.npy",  allow_pickle=True).item()
 
-    if mode == "auto":
-        cell_traces = lnk.utils.dff(cell_traces)
     if mode == "raw":
         cell_traces = cell_traces.astype(np.float32)
+    elif mode == "dff":
+        cell_traces = lnk.utils.dff(cell_traces)
     elif mode == "percentile":
         baseline = np.percentile(cell_traces, 20, axis=1, keepdims=True)
         cell_traces = (cell_traces - baseline) / np.abs(lnk.utils.divisor(baseline))
@@ -255,11 +248,6 @@ def load_suite2p_data(path, mode="auto"):
 # Ensures that the provided path is the VoluSeg directory
 def _ensure_voluseg_path(path):
     path = _path(path)
-    if (path / "voluseg").exists():
-        path = path / "voluseg"
-    if path.name != "voluseg":
-        lnk.meta.Error("No voluseg directory found at %s", path, error=FileNotFoundError)
-
     needed_files = ["cells0_clean.hdf5", "volume0.hdf5"]
     for file in needed_files:
         if path / file not in list(path.iterdir()):
@@ -267,17 +255,17 @@ def _ensure_voluseg_path(path):
     return path
 
 # Loads VoluSeg data from the given path
-def load_voluseg_data(path, mode="auto"):
+def load_voluseg_data(path, mode="raw"):
     path = _ensure_voluseg_path(path)
 
     volume_data = h5py.File(path / "volume0.hdf5",      "r")
     cell_data   = h5py.File(path / "cells0_clean.hdf5", "r")
 
-    if mode == "auto":
+    if mode == "raw":
+        cell_traces = cell_data["cell_timeseries_raw"][:].astype(np.float32)
+    if mode == "dff":
         raw_traces = cell_data["cell_timeseries_raw"][:].astype(np.float32)
         cell_traces = lnk.utils.dff(raw_traces)
-    elif mode == "raw":
-        cell_traces = cell_data["cell_timeseries_raw"][:].astype(np.float32)
     else:
         if mode == "percentile":
             raw_traces = cell_data["cell_timeseries_raw"][:].astype(np.float32)
@@ -318,16 +306,17 @@ def _ensure_combined_path(path, file="segdata.h5"):
 # Loads combined data from the given path
 def load_combined_data(path, file="segdata.h5"):
     path = _ensure_combined_path(path, file)
-
     with h5py.File(path / file, "r") as f:
-        rois     = f["rois"][:].astype(np.int64)
-        traces   = f["traces"][:]
-        bmap     = f["brainmap"][:]
-        shape    = f["shape"][:]
-        metadata = f["metadata"][:]
-        s2p_rois = f["s2p_rois"][:]
-        vsg_rois = f["vsg_rois"][:]
-        return rois, cell_traces, bmap, shape, metadata, s2p_rois, vsg_rois
+        rois      = f["rois"][:]
+        shape     = f["shape"][:]
+        traces    = f["traces"][:]
+        bmap      = f["brainmap"][:]
+        ref_vol   = f["ref_vol"][()]
+        metadata  = f["metadata"][:]
+        s2p_rois  = f["s2p_rois"][:]
+        vsg_rois  = f["vsg_rois"][:]
+        transform = f["transform"][:]
+        return rois, cell_traces, bmap, shape, metadata, s2p_rois, vsg_rois, transform, ref_vol
 
 
 #--| Trials |---------------------------------------------------------------------------#
