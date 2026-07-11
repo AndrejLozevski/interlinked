@@ -270,7 +270,7 @@ def load_voluseg_data(path, mode="raw"):
         if mode == "percentile":
             raw_traces = cell_data["cell_timeseries_raw"][:].astype(np.float32)
             baseline = np.percentile(raw_traces, 20, axis=1, keepdims=True)
-        elif auto == "voluseg":
+        elif mode == "voluseg":
             raw_traces = cell_data["cell_timeseries"][:].astype(np.float32)
             baseline   = cell_data["cell_baseline"][:].astype(np.float32)
         else:
