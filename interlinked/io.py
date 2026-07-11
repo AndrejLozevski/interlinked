@@ -263,7 +263,7 @@ def load_voluseg_data(path, mode="raw"):
 
     if mode == "raw":
         cell_traces = cell_data["cell_timeseries_raw"][:].astype(np.float32)
-    if mode == "dff":
+    elif mode == "dff":
         raw_traces = cell_data["cell_timeseries_raw"][:].astype(np.float32)
         cell_traces = lnk.utils.dff(raw_traces)
     else:
