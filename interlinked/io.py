@@ -316,7 +316,7 @@ def load_combined_data(path, file="segdata.h5"):
         s2p_rois  = f["s2p_rois"][:]
         vsg_rois  = f["vsg_rois"][:]
         transform = f["transform"][:]
-        return rois, cell_traces, bmap, shape, metadata, s2p_rois, vsg_rois, transform, ref_vol
+        return rois, traces, bmap, shape, metadata, s2p_rois, vsg_rois, transform, ref_vol
 
 
 #--| Trials |---------------------------------------------------------------------------#
