@@ -56,7 +56,7 @@ def divisor(arr, minimum=1, default_positive=True):
     return signs * np.maximum(np.abs(arr), minimum)
 
 # Calculates dF/F from raw data
-def dff(raw, downsample=1, percentile=20, window=300):
+def dff(raw, downsample=1, percentile=20, window=300, background=0, safe=True):
     if raw.ndim == 1:
         raw = np.expand_dims(raw, axis=0)
 
@@ -70,7 +70,9 @@ def dff(raw, downsample=1, percentile=20, window=300):
     Lc, Lt = raw.shape
     baseline = interpolate(range(0, Lt), range(0, Lt, downsample), baseline)
     assert len(baseline) == len(raw)
-    return (raw - baseline) / np.abs(divisor(baseline))
+    if not safe:
+        return (raw - baseline) / np.abs(baseline - background)
+    return (raw - baseline) / np.abs(divisor(baseline - background))
 
 # Convolves a time series with an exponential decay function
 def decay(data, tau=2.00, width=16, inv=False):

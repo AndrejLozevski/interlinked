@@ -119,12 +119,14 @@ Any ALL-CAPS variable listed below can be assumed as a parameter found in the de
   fp: *ndarray (ndim of 2)* --- y-values of input data<br>
   returns: *ndarray (ndim of 2)*<br>
     
-- `def dff(raw, downsample=1, percentile=20, window=300)`<br>
+- `def dff(raw, downsample=1, percentile=20, window=300, background=0, safe=True)`<br>
   **Calculates the ΔF/F of a calcium trace using a percentile filter and a sliding window**<br>
   raw: *ndarray (ndim of 1 or 2)* --- input array for which to calculate ΔF/F, assuming shape (cells, timepoints)<br>
   downsample: *int* --- downsampling factor (setting to 1 prevents downsampling)<br>
   percentile: *float* --- percentile with which to calculate the baseline of the time series<br>
   window: *int* --- sliding window size with which to calculate the baseline of the time series<br>
+  background: *float* --- background fluorescence the subtract from the baseline division for correcting high-SNR, high-baseline traces<br>
+  safe: *bool* --- whether to use divisor() in the denominator to prevent the risk of unintentional multiplication<br>
   returns: *ndarray (ndim of raw)*<br>
 
 - `def divisor(arr, minimum=1, default_positive=True)`<br>
