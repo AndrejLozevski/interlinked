@@ -256,6 +256,8 @@ def register_array(mov, ref, mov_res, ref_res=None, allow_rotation=False, cval=0
     transform[0,:] = tx_params[:3][::-1]
     transform[1,:] = tx_params[-3:][::-1]
 
+    mov = sitk.GetArrayFromImage(mov)
+    ref = sitk.GetArrayFromImage(ref)
     mov = move_array(mov, ref, transform, mov_res, ref_res, cval, order)
     return mov, transform
 
@@ -274,6 +276,11 @@ def move_array(mov, ref, transform, mov_res, ref_res=None, cval=0, order=3, flip
 
     if order not in [0, 1, 2, 3]:
         lnk.meta.Error("Interpolation order must be an integer between 0 and 3", error=ValueError)
+
+    ref = sitk.GetImageFromArray(ref.astype(np.float32))
+    mov = sitk.GetImageFromArray(mov.astype(np.float32))
+    ref.SetSpacing(ref_res[::-1])
+    mov.SetSpacing(mov_res[::-1])
 
     tx = sitk.Euler3DTransform()
     if transform.shape == (2, 3):
