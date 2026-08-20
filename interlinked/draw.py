@@ -19,15 +19,35 @@ GREEN_OVERLAY = LinearSegmentedColormap("green_overlay", {
     "blue":  ((0.0, 0.0, 0.0), (0.5, 0.0, 0.0), (1.0, 0.0, 0.0)),
     "alpha": ((0.0, 0.0, 0.0), (0.5, 0.5, 0.5), (1.0, 1.0, 1.0))  
 })
-BLUE_OVERLAY = LinearSegmentedColormap("green_overlay", {
+BLUE_OVERLAY = LinearSegmentedColormap("blue_overlay", {
     "red":   ((0.0, 0.0, 0.0), (0.5, 0.0, 0.0), (1.0, 0.0, 0.0)),
     "green": ((0.0, 0.0, 0.0), (0.5, 0.0, 0.0), (1.0, 0.0, 0.0)),
     "blue":  ((0.0, 0.0, 0.0), (0.5, 0.5, 0.5), (1.0, 1.0, 1.0)),
     "alpha": ((0.0, 0.0, 0.0), (0.5, 0.5, 0.5), (1.0, 1.0, 1.0))  
 })
+
 MAGENTA_OVERLAY = LinearSegmentedColormap("magenta_overlay", {
     "red":   ((0.0, 0.0, 0.0), (0.5, 0.5, 0.5), (1.0, 1.0, 1.0)),
     "green": ((0.0, 0.0, 0.0), (0.5, 0.0, 0.0), (1.0, 0.0, 0.0)),
+    "blue":  ((0.0, 0.0, 0.0), (0.5, 0.5, 0.5), (1.0, 1.0, 1.0)),
+    "alpha": ((0.0, 0.0, 0.0), (0.5, 0.5, 0.5), (1.0, 1.0, 1.0))  
+})
+CYAN_OVERLAY = LinearSegmentedColormap("cyan_overlay", {
+    "red":   ((0.0, 0.0, 0.0), (0.5, 0.0, 0.0), (1.0, 0.0, 0.0)),
+    "green": ((0.0, 0.0, 0.0), (0.5, 0.5, 0.5), (1.0, 1.0, 1.0)),
+    "blue":  ((0.0, 0.0, 0.0), (0.5, 0.5, 0.5), (1.0, 1.0, 1.0)),
+    "alpha": ((0.0, 0.0, 0.0), (0.5, 0.5, 0.5), (1.0, 1.0, 1.0))  
+})
+YELLOW_OVERLAY = LinearSegmentedColormap("yellow_overlay", {
+    "red":   ((0.0, 0.0, 0.0), (0.5, 0.5, 0.5), (1.0, 1.0, 1.0)),
+    "green": ((0.0, 0.0, 0.0), (0.5, 0.5, 0.5), (1.0, 1.0, 1.0)),
+    "blue":  ((0.0, 0.0, 0.0), (0.5, 0.0, 0.0), (1.0, 0.0, 0.0)),
+    "alpha": ((0.0, 0.0, 0.0), (0.5, 0.5, 0.5), (1.0, 1.0, 1.0))  
+})
+
+WHITE_OVERLAY = LinearSegmentedColormap("white_overlay", {
+    "red":   ((0.0, 0.0, 0.0), (0.5, 0.5, 0.5), (1.0, 1.0, 1.0)),
+    "green": ((0.0, 0.0, 0.0), (0.5, 0.5, 0.5), (1.0, 1.0, 1.0)),
     "blue":  ((0.0, 0.0, 0.0), (0.5, 0.5, 0.5), (1.0, 1.0, 1.0)),
     "alpha": ((0.0, 0.0, 0.0), (0.5, 0.5, 0.5), (1.0, 1.0, 1.0))  
 })
@@ -35,18 +55,19 @@ MAGENTA_OVERLAY = LinearSegmentedColormap("magenta_overlay", {
 
 #--| Functions |------------------------------------------------------------------------#
 
-# Draws colored ROIs in a volume
-def rois(rois, shape):
-    Lz, Ly, Lx = shape
-    hsv = np.zeros((rois.max() + 1, 3), np.float32)
-    hsv[1:, 0] = np.random.rand(rois.max() + 1)
-    hsv[1:, 1] = 1.0
-    hsv[1:, 2] = 1.0
-
-    rgb = hsv_to_rgb(hsv)
-    rgb = np.rint(rgb * 255).astype(np.uint8)
-    color = rgb[rois + 1]
-    rois = color.transpose(0,3,1,2)
-    return rois
+# Draws colored ROIs in a 2D array
+def color_rois(rois, bkgd=-1):
+    Ly, Lx = rois.shape
+    img = np.zeros((3, Ly, Lx), np.uint8)
+    for i in np.unique(rois):
+        if i == bkgd:
+            continue
+        h = np.random.rand(1)[0]
+        hsv = [h, 1.0, 1.0]
+        rgb = hsv_to_rgb(hsv)
+        rgb = np.rint(rgb * 255).astype(np.uint8)
+        img[:, rois == i] = rgb[:, None]
+    img = img.transpose(1,2,0)
+    return img
 
 

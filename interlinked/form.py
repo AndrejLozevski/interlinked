@@ -249,13 +249,18 @@ def register_array(mov, ref, mov_res, ref_res=None, allow_rotation=False, cval=0
         sitk.CenteredTransformInitializerFilter.GEOMETRY
     )
     reg.SetInitialTransform(transform, inPlace=False)
-    transform = reg.Execute(ref, mov)
+    tx = reg.Execute(ref, mov)
+
+    tx_params = transform.GetParameters()
+    transform = np.empty((2, 3), np.float32)
+    transform[0,:] = tx_params[:3][::-1]
+    transform[1,:] = tx_params[-3:][::-1]
 
     mov = move_array(mov, ref, transform, mov_res, ref_res, cval, order)
     return mov, transform
 
-# Applies a transformation to the given array in real units
-def move_array(mov, ref, transform, mov_res, ref_res=None, cval=0, order=3):
+# Applies a 3D Euler transformation to the given array in real units
+def move_array(mov, ref, transform, mov_res, ref_res=None, cval=0, order=3, flip_dims=False):
     if not (mov.ndim == 3 and ref.ndim == 3):
         lnk.meta.Error("Moving array and reference array must have dimensionality of 3", error=ValueError)
 
@@ -270,6 +275,18 @@ def move_array(mov, ref, transform, mov_res, ref_res=None, cval=0, order=3):
     if order not in [0, 1, 2, 3]:
         lnk.meta.Error("Interpolation order must be an integer between 0 and 3", error=ValueError)
 
+    tx = sitk.Euler3DTransform()
+    if transform.shape == (2, 3):
+        rotZ, rotY, rotX = transform[0,:][::-1] if flip_dims else transform[0,:]
+        offZ, offY, offX = transform[1,:][::-1] if flip_dims else transform[1,:]
+    elif len(transform) == 3:
+        rotZ, rotY, rotX = 0.0, 0.0, 0.0
+        offZ, offY, offX = transform[::-1] if flip_dims else transform
+    else:
+        lnk.meta.Error("Transform must be a (2, 3) or (1, 3) array)", error=ValueError)
+    tx.SetRotation(rotX, rotY, rotZ)
+    tx.setTranslation((offX, offY, offZ))
+
     mov = sitk.GetImageFromArray(mov.astype(np.float32))
     ref = sitk.GetImageFromArray(ref.astype(np.float32))
     mov.SetSpacing(mov_res[::-1])
@@ -283,9 +300,10 @@ def move_array(mov, ref, transform, mov_res, ref_res=None, cval=0, order=3):
     adj.SetInterpolator(order)
     adj.SetDefaultPixelValue(cval)
     adj.SetOutputPixelType(mov.GetPixelID())
-    adj.SetTransform(transform)
+    adj.SetTransform(tx)
 
     mov = adj.Execute(mov)
+    mov = sitk.GetArrayFromImage(mov)
     return mov
 
 

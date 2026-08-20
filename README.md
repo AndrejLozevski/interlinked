@@ -11,13 +11,13 @@ pip install interlinked-lab
 
 ## Submodules
 All code is organized into the following submodules:
+- **config** --- Contains methods for updating, resetting, loading, and saving parameter settings for the module's default behaviors and arguments
 - **utils** --- Contains functions for a wide range of uses
 - **io** --- Contains functions for I/O operations and streamlined file use
 - **form** --- Contains functions for manipulating labeled and non-labeled arrays
 - **stats** --- Contains functions for statistical tests and measures
 - **info** --- Contains functions for information theoretic tests and measures
 - **draw** --- Contains functions for data visualization
-- **config** --- Contains methods for updating, resetting, loading, and saving parameter settings for the module's default behaviors and arguments
 
 Each submodule can be used in a program directly or through imports:
 ```python
@@ -338,20 +338,16 @@ Any ALL-CAPS variable listed below can be assumed as a parameter found in the de
   - *ndarray* --- registered input array<br>
   - *ndarray* --- transform array (rotation X, rotation Y, rotation Z, shift X, shift Y, shift Z)<br>
   
-- `def align_arrays(arr, ref, factor=100, order=3)`<br>
-  **Aligns one array to a reference array of same dimensionality**<br>
-  arr: *ndarray* --- input array<br>
+- `def move_array(mov, ref, transform, mov_res, ref_res=None, cval=0, order=3, flip_dims=False)`<br>
+  **Moves array according to a 3D Euler transform from the given transform values**<br>
+  mov: *ndarray* --- moving array<br>
   ref: *ndarray* --- reference array<br>
-  factor: *int* --- precision of alignment<br>
-  returns:<br>
-  - *ndarray* --- aligned input array<br>
-  - *ndarray* --- transform array<br>
-
-- `def align_arrays(arr, ref, factor=100, order=3)`<br>
-  **Aligns one array to a reference array of same dimensionality**<br>
-  arr: *ndarray* --- input array<br>
-  ref: *ndarray* --- reference array<br>
-  factor: *int* --- precision of alignment<br>
+  transform: *tuple\[float\] | list\[float\] | ndarray\[float\]* --- transformation rotation and translation values ((rotZ, rotY, rotX), (offZ, offY, offX))<br>
+  mov_res: *tuple(float, float, float)* --- moving array resolution<br>
+  ref_res: *tuple(float, float, float)* --- reference array resolution (defaults to mov_res)<br>
+  cval: *int | float* --- default value for background when registering<br>
+  order: *int* (0, 1, 2, 3) --- interpolation order<br>
+  flip_dims: *bool* --- if True, transform assumes xyz dimension order, and if False, assumes zyx order<br>
   returns:<br>
   - *ndarray* --- aligned input array<br>
   - *ndarray* --- transform array<br>
@@ -453,6 +449,19 @@ Any ALL-CAPS variable listed below can be assumed as a parameter found in the de
   returns: *float*<br>
 ---
 
+### Draw<br>
+- `def color_rois(rois, bkgd=-1)`<br>
+  **Colors a labeled array**<br>
+  rois: *ndarray (ndim of 2)*<br>
+  bkgd: *float | int*<br>
+  returns: *float*<br>
+
+- `def KL_H(x, k)`<br>
+  **Calculates the Shannon Entropy of a continuous variable using the Kozachenko-Leonenko estimator**<br>
+  x: *ndarray (ndim of 1)* --- input array<br>
+  k: *int* --- number of nearest neighbors<br>
+  returns: *float*<br>
+---
 
 ## License
 MIT
