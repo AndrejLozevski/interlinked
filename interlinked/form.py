@@ -203,11 +203,11 @@ def weight_rois(rois, weights):
 
 # Aligns one array to a reference array in real units
 def register_array(mov, ref, mov_res, ref_res=None, allow_rotation=False, cval=0, order=3):
+    if not ref_res:
+        ref_res = mov_res
     if not (mov.ndim == ref.ndim and len(mov_res) == len(ref_res)):
         lnk.meta.Error("Array and reference array must have same dimensionality", error=ValueError)
 
-    if not ref_res:
-        ref_res = mov_res
     if not (mov.ndim == len(mov_res) and ref.ndim == len(ref_res)):
         lnk.meta.Error("Array and its resolution must have same dimensionality", error=ValueError)
 
@@ -264,11 +264,11 @@ def move_array(mov, ref, transform, mov_res, ref_res=None, cval=0, order=3, flip
     if not (mov.ndim == 3 and ref.ndim == 3):
         lnk.meta.Error("Moving array and reference array must have dimensionality of 3", error=ValueError)
 
+    if not ref_res:
+        ref_res = mov_res
     if not (mov.ndim == ref.ndim and len(mov_res) == len(ref_res)):
         lnk.meta.Error("Moving array and reference array must have same dimensionality", error=ValueError)
 
-    if not ref_res:
-        ref_res = mov_res
     if not (mov.ndim == len(mov_res) and ref.ndim == len(ref_res)):
         lnk.meta.Error("Array and its resolution must have same dimensionality", error=ValueError)
 
