@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "interlinked-lab"
-version = "0.2.5"
+version = "0.2.6"
 requires-python = ">=3.10"
 dependencies = [
     "numpy >= 2.0.0",
@@ -12,6 +12,7 @@ dependencies = [
     "matplotlib >= 3.9",
     "h5py >= 3.11",
     "scikit-image >= 0.24",
+    "simpleitk >= 2.5.6",
 ]
 classifiers = [
     "Programming Language :: Rust",

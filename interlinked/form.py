@@ -3,6 +3,7 @@ import logging
 import numpy as np
 import scipy as sp
 import skimage as ski
+import SimpleITK as sitk
 
 import interlinked as lnk
 
@@ -149,28 +150,87 @@ def weight_rois(rois, weights):
 
 #--| Alignment |-----------------------------------------------------------------------------#
 
-# Aligns one array to a reference array
-def align_arrays(arr, ref, factor=100, order=3):
-    if not arr.ndim == ref.ndim:
+# Aligns one array to a reference array in real units
+def register_array(mov, ref, mov_res, ref_res=None, allow_rotation=False, cval=0, order=3):
+    if not (mov.ndim == ref.ndim and len(mov_res) == len(ref_res)):
         lnk.meta.Error("Array and reference array must have same dimensionality", error=ValueError)
 
-    shift, _, _ = ski.registration.phase_cross_correlation(arr, ref, upsample_factor=factor)
-    if arr.ndim == 2:
-        dy, dx = shift
-        transform = np.array([
-            [1, 0, dy],
-            [0, 1, dx]
-        ], np.float32)
-    elif arr.ndim == 3:
-        dz, dy, dx = shift
-        transform = np.array([
-            [1, 0, 0, dz],
-            [0, 1, 0, dy],
-            [0, 0, 1, dx]
-        ], np.float32)
-    else:
-        lnk.meta.Error("Arrays must have dimensionality of 2 or 3", error=ValueError)
+    if not ref_res:
+        ref_res = mov_res
+    if not (mov.ndim == len(mov_res) and ref.ndim == len(ref_res)):
+        lnk.meta.Error("Array and its resolution must have same dimensionality", error=ValueError)
 
-    arr = sp.ndimage.affine_transform(arr, transform, order=order)
-    return arr, transform
+    if order not in [0, 1, 2, 3]:
+        lnk.meta.Error("Interpolation order must be an integer between 0 and 3", error=ValueError)
+
+    ref = sitk.GetImageFromArray(ref.astype(np.float32))
+    mov = sitk.GetImageFromArray(mov.astype(np.float32))
+    ref.SetSpacing(ref_res[::-1])
+    mov.SetSpacing(mov_res[::-1])
+
+    reg = sitk.ImageRegistrationMethod()
+    reg.SetInterpolator(sitk.sitkLinear)
+
+    reg.SetMetricAsMattesMutualInformation(32)
+    reg.SetMetricSamplingStrategy(reg.RANDOM)
+    reg.SetMetricSamplingPercentage(0.1)
+
+    rot = 1.0 if allow_rotation else 0.0
+    reg.SetOptimizerScalesFromPhysicalShift()
+    reg.SetOptimizerWeights([
+        rot, rot, rot,
+        1.0, 1.0, 1.0
+    ])
+    reg.SetOptimizerAsRegularStepGradientDescent(
+        learningRate=2.0,
+        minStep=1e-4,
+        numberOfIterations=100
+    )
+
+    reg.SetShrinkFactorsPerLevel([4, 2, 1])
+    reg.SetSmoothingSigmasPerLevel([2, 1, 0])
+    reg.SmoothingSigmasAreSpecifiedInPhysicalUnitsOn()
+
+    transform = sitk.CenteredTransformInitializer(
+        ref,
+        mov,
+        sitk.Euler3DTransform(),
+        sitk.CenteredTransformInitializerFilter.GEOMETRY
+    )
+    reg.SetInitialTransform(transform, inPlace=False)
+    transform = reg.Execute(ref, mov)
+
+    mov = move_array(mov, ref, transform, mov_res, ref_res, cval, order)
+    return mov, ref, transform
+
+# Applies a transformation to the given array in real units
+def move_array(mov, ref, transform, mov_res, ref_res=None, cval=0, order=3):
+    if not (mov.ndim == ref.ndim and len(mov_res) == len(ref_res)):
+        lnk.meta.Error("Array and reference array must have same dimensionality", error=ValueError)
+
+    if not ref_res:
+        ref_res = mov_res
+    if not (mov.ndim == len(mov_res) and ref.ndim == len(ref_res)):
+        lnk.meta.Error("Array and its resolution must have same dimensionality", error=ValueError)
+
+    if order not in [0, 1, 2, 3]:
+        lnk.meta.Error("Interpolation order must be an integer between 0 and 3", error=ValueError)
+
+    mov = sitk.GetImageFromArray(mov.astype(np.float32))
+    ref = sitk.GetImageFromArray(ref.astype(np.float32))
+    mov.SetSpacing(mov_res[::-1])
+    ref.SetSpacing(ref_res[::-1])
+
+    methods = [sitk.sitkNearestNeighbor, sitk.sitkLinear, sitk.sitkBSpline2, sitk.sitkBSpline]
+    order   = methods[order]
+
+    adj = sitk.ResampleImageFilter()
+    adj.SetReferenceImage(ref)
+    adj.SetInterpolator(order)
+    adj.SetDefaultPixelValue(cval)
+    adj.SetOutputPixelType(mov.GetPixelID())
+    adj.SetTransform(transform)
+
+    mov = adj.Execute(mov)
+    return mov
 
