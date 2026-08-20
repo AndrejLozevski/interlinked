@@ -243,6 +243,42 @@ Any ALL-CAPS variable listed below can be assumed as a parameter found in the de
 ---
 
 ### Form<br>
+- `def norm(arr, vmin=None, vmax=None, clip=False)`<br>
+  **Normalizes an array**<br>
+  arr: *ndarray* --- input array<br>
+  vmin: *int | float* --- minimum value for normalization<br>
+  vmax: *int | float* --- maximum value for normalization<br>
+  clip: *bool* --- whether to clip values beyond vmin and vmax<br>
+  returns: *ndarray*<br>
+
+- `def pnorm(arr, pmin=5, pmax=95, clip=False)`<br>
+  **Normalizes an array by percentile**<br>
+  arr: *ndarray* --- input array<br>
+  pmin: *int | float* --- percentile for minimum value for normalization<br>
+  pmax: *int | float* --- percentile for maximum value for normalization<br>
+  clip: *bool* --- whether to clip values beyond pmin and pmax<br>
+  returns: *ndarray*<br>
+
+- `def norm_pair(arr1, arr2, clip=False)`<br>
+  **Normalizes two arrays by the superset of their values**<br>
+  arr1: *ndarray* --- input array 1<br>
+  arr2: *ndarray* --- input array 2<br>
+  clip: *bool* --- whether to clip values beyond vmin and vmax<br>
+  returns:<br>
+  - *ndarray* --- normalized array 1<br>
+  - *ndarray* --- normalized array 2<br>
+
+- `def pnorm(arr, pmin=5, pmax=95, clip=False)`<br>
+  **Normalizes two arrays by percentile of the superset of their values**<br>
+  arr1: *ndarray* --- input array 1<br>
+  arr2: *ndarray* --- input array 2<br>
+  pmin: *int | float* --- percentile for minimum value for normalization<br>
+  pmax: *int | float* --- percentile for maximum value for normalization<br>
+  clip: *bool* --- whether to clip values beyond pmin and pmax<br>
+  returns:<br>
+  - *ndarray* --- normalized array 1<br>
+  - *ndarray* --- normalized array 2<br>
+
 - `def form_volume(img, shape)`<br>
   **Forms a volumetric array from a tiled image, using the specified target shape**<br>
   img: *ndarray (ndim of 2)* --- original tiled image<br>
@@ -272,7 +308,7 @@ Any ALL-CAPS variable listed below can be assumed as a parameter found in the de
 - `def remove_rois(arr, rois, keep=False)`<br>
   **Removes the specified labels from a labeled array, leaving missing labels**<br>
   arr: *ndarray* --- labeled array<br>
-  rois: *list\[int] | ndarray (ndim of 1)* --- selected labels<br>
+  rois: *list\[int\] | ndarray (ndim of 1)* --- selected labels<br>
   keep: *bool* --- if True, remove whatever rois are not selected, and if False, remove whatever rois are selected<br>
   returns: *ndarray*<br>
 
@@ -286,8 +322,30 @@ Any ALL-CAPS variable listed below can be assumed as a parameter found in the de
 - `def weight_rois(rois, weights)`<br>
   **Substitutes a labeled array with each label's corresponding weight**<br>
   rois: *ndarray* --- labeled array<br>
-  weights: *list\[float] | ndarray (ndim of 1)* --- weights corresponding to each label<br>
+  weights: *list\[float\] | ndarray (ndim of 1)* --- weights corresponding to each label<br>
   returns: *ndarray*<br>
+
+- `def register_array(mov, ref, mov_res, ref_res=None, allow_rotation=False, cval=0, order=3)`<br>
+  **Aligns moving array to a reference array of same dimensionality**<br>
+  mov: *ndarray (ndim of 3)* --- moving array<br>
+  ref: *ndarray (ndim of 3)* --- reference array<br>
+  mov_res: *tuple(float, float, float)* --- moving array resolution<br>
+  ref_res: *tuple(float, float, float)* --- reference array resolution (defaults to mov_res)<br>
+  allow_rotation: *bool* --- whether to allow for rotation in registration transform<br>
+  cval: *int | float* --- default value for background when registering<br>
+  order: *int* (0, 1, 2, 3) --- interpolation order<br>
+  returns:<br>
+  - *ndarray* --- registered input array<br>
+  - *ndarray* --- transform array (rotation X, rotation Y, rotation Z, shift X, shift Y, shift Z)<br>
+  
+- `def align_arrays(arr, ref, factor=100, order=3)`<br>
+  **Aligns one array to a reference array of same dimensionality**<br>
+  arr: *ndarray* --- input array<br>
+  ref: *ndarray* --- reference array<br>
+  factor: *int* --- precision of alignment<br>
+  returns:<br>
+  - *ndarray* --- aligned input array<br>
+  - *ndarray* --- transform array<br>
 
 - `def align_arrays(arr, ref, factor=100, order=3)`<br>
   **Aligns one array to a reference array of same dimensionality**<br>

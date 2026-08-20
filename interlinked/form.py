@@ -15,6 +15,57 @@ log = logging.getLogger(__name__)
 ROW_TILES = 5
 
 
+#--| Utility |------------------------------------------------------------------------#
+
+# Normalizes an array
+def norm(arr, vmin=None, vmax=None, clip=False):
+    arr = arr.astype(np.float32)
+    if not vmin:
+        vmin = arr.min()
+    if not vmax:
+        vmax = arr.max()
+    if vmin == vmax:
+        lnk.meta.Error("Cannot normalize array where vmin equals vmax", error=ZeroDivisionError)
+
+    if clip:
+        arr = np.clip(arr, vmin, vmax)
+
+    arr -= vmin
+    arr /= (vmax - vmin)
+    return arr
+
+# Normalizes an array using percentiles
+def pnorm(arr, pmin=1, pmax=99, clip=False):
+    if not pmin < pmax:
+        lnk.meta.Error("Min percentile must be less than max percentile", error=ValueError)
+
+    vmin = np.percentile(arr, pmin)
+    vmax = np.percentile(arr, pmax)
+    arr = norm(arr, vmin, vmax, clip)
+    return arr
+
+# Normalizes two arrays together
+def norm_pair(arr1, arr2, clip=False):
+    vmin = min(arr1.min(), arr2.min())
+    vmax = max(arr1.max(), arr2.max())
+    arr1 = norm(arr1, vmin, vmax, clip)
+    arr2 = norm(arr2, vmin, vmax, clip)
+    return arr1, arr2
+
+# Normalizes two arrays together
+def pnorm_pair(arr1, arr2, pmin=1, pmax=99, clip=False):
+    if not pmin < pmax:
+        lnk.meta.Error("Min percentile must be less than max percentile", error=ValueError)
+
+    flat = np.concatenate(arr1.flatten(), arr2.flatten())
+    vmin = np.percentile(flat, pmin)
+    vmax = np.percentile(flat, pmax)
+
+    arr1 = norm(arr1, vmin, vmax, clip)
+    arr2 = norm(arr2, vmin, vmax, clip)
+    return arr1, arr2
+
+
 #--| Reshaping |------------------------------------------------------------------------#
 
 # Forms a volume from a tiled image
@@ -201,12 +252,15 @@ def register_array(mov, ref, mov_res, ref_res=None, allow_rotation=False, cval=0
     transform = reg.Execute(ref, mov)
 
     mov = move_array(mov, ref, transform, mov_res, ref_res, cval, order)
-    return mov, ref, transform
+    return mov, transform
 
 # Applies a transformation to the given array in real units
 def move_array(mov, ref, transform, mov_res, ref_res=None, cval=0, order=3):
+    if not (mov.ndim == 3 and ref.ndim == 3):
+        lnk.meta.Error("Moving array and reference array must have dimensionality of 3", error=ValueError)
+
     if not (mov.ndim == ref.ndim and len(mov_res) == len(ref_res)):
-        lnk.meta.Error("Array and reference array must have same dimensionality", error=ValueError)
+        lnk.meta.Error("Moving array and reference array must have same dimensionality", error=ValueError)
 
     if not ref_res:
         ref_res = mov_res
@@ -233,4 +287,5 @@ def move_array(mov, ref, transform, mov_res, ref_res=None, cval=0, order=3):
 
     mov = adj.Execute(mov)
     return mov
+
 
