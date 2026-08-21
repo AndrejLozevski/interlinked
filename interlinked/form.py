@@ -57,9 +57,9 @@ def pnorm_pair(arr1, arr2, pmin=1, pmax=99, clip=False):
     if not pmin < pmax:
         lnk.meta.Error("Min percentile must be less than max percentile", error=ValueError)
 
-    flat = np.concatenate(arr1.flatten(), arr2.flatten())
-    vmin = np.percentile(flat, pmin)
-    vmax = np.percentile(flat, pmax)
+    stack = np.vstack([arr1, arr2])
+    vmin = np.percentile(stack, pmin)
+    vmax = np.percentile(stack, pmax)
 
     arr1 = norm(arr1, vmin, vmax, clip)
     arr2 = norm(arr2, vmin, vmax, clip)
@@ -214,17 +214,18 @@ def register_array(mov, ref, mov_res, ref_res=None, allow_rotation=False, cval=0
     if order not in [0, 1, 2, 3]:
         lnk.meta.Error("Interpolation order must be an integer between 0 and 3", error=ValueError)
 
-    ref = sitk.GetImageFromArray(ref.astype(np.float32))
-    mov = sitk.GetImageFromArray(mov.astype(np.float32))
+    ref = sitk.GetImageFromArray(ref)
+    mov = sitk.GetImageFromArray(mov)
     ref.SetSpacing(ref_res[::-1])
     mov.SetSpacing(mov_res[::-1])
 
     reg = sitk.ImageRegistrationMethod()
     reg.SetInterpolator(sitk.sitkLinear)
 
-    reg.SetMetricAsMattesMutualInformation(32)
+    reg.SetMetricAsMattesMutualInformation(50)
+    #reg.SetMetricSamplingStrategy(reg.REGULAR)
     reg.SetMetricSamplingStrategy(reg.RANDOM)
-    reg.SetMetricSamplingPercentage(0.1)
+    reg.SetMetricSamplingPercentage(1.0)
 
     rot = 1.0 if allow_rotation else 0.0
     reg.SetOptimizerScalesFromPhysicalShift()
@@ -235,11 +236,11 @@ def register_array(mov, ref, mov_res, ref_res=None, allow_rotation=False, cval=0
     reg.SetOptimizerAsRegularStepGradientDescent(
         learningRate=2.0,
         minStep=1e-4,
-        numberOfIterations=100
+        numberOfIterations=250
     )
 
-    reg.SetShrinkFactorsPerLevel([4, 2, 1])
-    reg.SetSmoothingSigmasPerLevel([2, 1, 0])
+    reg.SetShrinkFactorsPerLevel([8, 4, 2, 1])
+    reg.SetSmoothingSigmasPerLevel([4, 2, 1, 0])
     reg.SmoothingSigmasAreSpecifiedInPhysicalUnitsOn()
 
     transform = sitk.CenteredTransformInitializer(
@@ -277,8 +278,8 @@ def move_array(mov, ref, transform, mov_res, ref_res=None, cval=0, order=3, flip
     if order not in [0, 1, 2, 3]:
         lnk.meta.Error("Interpolation order must be an integer between 0 and 3", error=ValueError)
 
-    ref = sitk.GetImageFromArray(ref.astype(np.float32))
-    mov = sitk.GetImageFromArray(mov.astype(np.float32))
+    ref = sitk.GetImageFromArray(ref)
+    mov = sitk.GetImageFromArray(mov)
     ref.SetSpacing(ref_res[::-1])
     mov.SetSpacing(mov_res[::-1])
 
@@ -291,13 +292,8 @@ def move_array(mov, ref, transform, mov_res, ref_res=None, cval=0, order=3, flip
         offZ, offY, offX = transform[::-1] if flip_dims else transform
     else:
         lnk.meta.Error("Transform must be a (2, 3) or (1, 3) array)", error=ValueError)
-    tx.SetRotation(rotX, rotY, rotZ)
-    tx.setTranslation((offX, offY, offZ))
-
-    mov = sitk.GetImageFromArray(mov.astype(np.float32))
-    ref = sitk.GetImageFromArray(ref.astype(np.float32))
-    mov.SetSpacing(mov_res[::-1])
-    ref.SetSpacing(ref_res[::-1])
+    tx.SetRotation(float(rotX), float(rotY), float(rotZ))
+    tx.SetTranslation((float(offX), float(offY), float(offZ)))
 
     methods = [sitk.sitkNearestNeighbor, sitk.sitkLinear, sitk.sitkBSpline2, sitk.sitkBSpline]
     order   = methods[order]

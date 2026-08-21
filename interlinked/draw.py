@@ -58,16 +58,21 @@ WHITE_OVERLAY = LinearSegmentedColormap("white_overlay", {
 # Draws colored ROIs in a 2D array
 def color_rois(rois, bkgd=-1):
     Ly, Lx = rois.shape
-    img = np.zeros((3, Ly, Lx), np.uint8)
-    for i in np.unique(rois):
-        if i == bkgd:
-            continue
-        h = np.random.rand(1)[0]
-        hsv = [h, 1.0, 1.0]
-        rgb = hsv_to_rgb(hsv)
-        rgb = np.rint(rgb * 255).astype(np.uint8)
-        img[:, rois == i] = rgb[:, None]
-    img = img.transpose(1,2,0)
-    return img
+    lbls = np.unique(rois)
+    lbls = lbls[lbls != bkgd]
+    Ln = len(lbls)
+
+    h = np.random.rand(Ln)
+    hsv = np.stack([h, np.ones(Ln), np.ones(Ln)], axis=1)
+    rgb = hsv_to_rgb(hsv)
+    rgb = np.rint(rgb * 255).astype(np.uint8)
+
+    background = np.zeros((1, 3), np.uint8)
+    lut = np.vstack([rgb, background])
+
+    new = np.searchsorted(lbls, rois)
+    new[rois != bkgd] = Ln
+    rois = lut[new]
+    return rois
 
 
