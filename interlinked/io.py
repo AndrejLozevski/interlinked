@@ -311,11 +311,11 @@ def load_combined_data(path, file="segdata.h5"):
         shape     = f["shape"][:]
         traces    = f["traces"][:]
         bmap      = f["brainmap"][:]
-        ref_vol   = f["ref_vol"][()]
         metadata  = f["metadata"][:]
         s2p_rois  = f["s2p_rois"][:]
         vsg_rois  = f["vsg_rois"][:]
         transform = f["transform"][:]
+        ref_vol   = f["reference_volume"][()]
         return rois, traces, bmap, shape, metadata, s2p_rois, vsg_rois, transform, ref_vol
 
 

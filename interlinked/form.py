@@ -202,7 +202,7 @@ def weight_rois(rois, weights):
 #--| Alignment |-----------------------------------------------------------------------------#
 
 # Aligns one array to a reference array in real units
-def register_array(mov, ref, mov_res, ref_res=None, allow_rotation=False, cval=0, order=3):
+def register_array(mov, ref, mov_res, ref_res=None, allow_rotation=False, cval=0, order=3, n_bins=32):
     if not ref_res:
         ref_res = mov_res
     if not (mov.ndim == ref.ndim and len(mov_res) == len(ref_res)):
@@ -222,8 +222,7 @@ def register_array(mov, ref, mov_res, ref_res=None, allow_rotation=False, cval=0
     reg = sitk.ImageRegistrationMethod()
     reg.SetInterpolator(sitk.sitkLinear)
 
-    reg.SetMetricAsMattesMutualInformation(50)
-    #reg.SetMetricSamplingStrategy(reg.REGULAR)
+    reg.SetMetricAsMattesMutualInformation(n_bins)
     reg.SetMetricSamplingStrategy(reg.RANDOM)
     reg.SetMetricSamplingPercentage(1.0)
 
