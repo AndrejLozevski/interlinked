@@ -21,6 +21,7 @@ fn interlinked(py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     info_mod.add_function(wrap_pyfunction!(info::ksg_cmi, &info_mod)?)?;
     info_mod.add_function(wrap_pyfunction!(info::ksg_ii,  &info_mod)?)?;
     info_mod.add_function(wrap_pyfunction!(info::kl_h,    &info_mod)?)?;
+    info_mod.add_function(wrap_pyfunction!(info::kl_s,    &info_mod)?)?;
     m.add_submodule(&info_mod)?;
 
     Ok(())

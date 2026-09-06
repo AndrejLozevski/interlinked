@@ -1,9 +1,11 @@
 use std::f64::consts::LN_2;
+
+use pyo3::Python;
 use pyo3::prelude::*;
 use pyo3::exceptions::PyValueError;
 
 use rayon::prelude::*;
-use numpy::PyReadonlyArray1;
+use numpy::{IntoPyArray, PyArray1, PyReadonlyArray1};
 
 use kiddo::KdTree;
 use kiddo::distance_metric::DistanceMetric;
@@ -125,6 +127,20 @@ fn entropy_kl_2d_tree(tree: &KdTree<f64, 2>, x: &[f64], y: &[f64], k: usize) -> 
     -digamma(k as f64) + digamma(n) + (2.0 * LN_2) + (2.0 * log_sum / n)
 }
 
+fn surprise_kl_1d_tree(tree: &KdTree<f64, 1>, x: &[f64], k: usize) -> Vec<f64> {
+    let n = x.len() as f64;
+    let offset = -digamma(k as f64) + digamma(n) + LN_2;
+
+    x.iter()
+        .map(|&xi| {
+            let log_dist = tree.nearest_n::<Chebyshev>(&[xi], k + 1)
+                .last()
+                .map(|nb| nb.distance.max(1e-7).ln())
+                .unwrap_or(f64::NEG_INFINITY);
+            offset + log_dist
+        })
+        .collect()
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 /// Python-usable scripts
@@ -153,6 +169,34 @@ pub fn kl_h(
     }
 
     Ok(entropy_kl_1d_tree(&tree, &x, k))
+}
+
+#[pyfunction]
+pub fn kl_s(
+    py: Python<'_>,
+    x: PyReadonlyArray1<f64>,
+    k: usize,
+) -> PyResult<Py<PyArray1<f64>>> {
+    let x = x.as_array();
+    let n = x.len();
+
+    if n == 0 {
+        return Err(PyValueError::new_err("array must be non-empty"));
+    }
+    if k == 0 || k >= n {
+        return Err(PyValueError::new_err(format!("k must satisfy 1 ≤ k < n (got k={k}, n={n})")));
+    }
+
+    let x: Vec<f64> = x.iter().copied().collect();
+
+    let mut tree: KdTree<f64, 1> = KdTree::with_capacity(n);
+    for (i, &xi) in x.iter().enumerate() {
+        tree.add(&[xi], i as u64);
+    }
+
+    let surprise = surprise_kl_1d_tree(&tree, &x, k);
+    //Ok(surprise.into_pyarray(py).to_owned())
+    Ok(surprise.into_pyarray(py).into())
 }
 
 #[pyfunction]

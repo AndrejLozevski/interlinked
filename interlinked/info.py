@@ -34,6 +34,12 @@ def _bins(path, new=False):
     return bins
 
 
+#--| Surprise |-------------------------------------------------------------------------#
+def KL_s(x, k=NUM_KNNS):
+    x = np.asarray(x, dtype=np.float64)
+    return rs_info.kl_s(x, k)
+
+
 #--| Entropy |--------------------------------------------------------------------------#
 
 # Calculates entropy of a histogram
