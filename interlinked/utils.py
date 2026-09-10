@@ -55,6 +55,14 @@ def divisor(arr, minimum=1, default_positive=True):
     signs[signs == 0] = default_sign
     return signs * np.maximum(np.abs(arr), minimum)
 
+# Creates a list of batched indices
+def create_batches(total, b_size):
+    q, r = divmod(total, b_size)
+    Lb = q + 1 if r > 0 else q
+    batches = [range(b * b_size, min((b+1) * b_size, total)) for b in range(Lb)]
+    return batches
+
+
 # Calculates dF/F from raw data
 def dff(raw, downsample=1, percentile=20, window=300, background=0, safe=True):
     if raw.ndim == 1:
